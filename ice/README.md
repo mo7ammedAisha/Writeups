@@ -7,7 +7,7 @@
 <br><br>
 
 ## Reconnaissance
-<p>First We need to Scan all ports and finding all open ports:</p> <br>
+<p>First We need to Scan all ports and find all open ports:</p> <br>
 
 ```bash
 sudo nmap -sS -T4 -p- <target ip>
