@@ -309,7 +309,7 @@ gcc icecast_exploit.c -o icecast_exploit
 
 <p> 
 The server is vernable but no shells because The code is PoC and there <br> 
-is not a socket in the code to buid a connection and get a shell .. 
+is not a socket in the code to buid the connection ... 
 </p>
 
 
