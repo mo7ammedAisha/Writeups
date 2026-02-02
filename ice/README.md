@@ -226,7 +226,7 @@ Golden ticket attacks allow us to maintain persistence and authenticate as any u
 
 
 <br><p>
-We have the password for the user 'Dark'  --> we can now authenticate to the machine and access it via remote desktop (MSRDP).<br> 
+We have the password of the user 'Dark'  --> we can now authenticate to the machine and access it via remote desktop (MSRDP).<br> 
 A “clean” and legitimate entry from the system’s perspective/vision.<br>
 This is not server, It's workstation (it means if you login during the legal user is active, you will kick the user out!! It may attract attention <br>
 But Why RDP is still useful ?? Because you see as the actual user sees it (User vision/perspective = more information), you can use remmia tool 
