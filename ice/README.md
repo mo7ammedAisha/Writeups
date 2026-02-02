@@ -297,7 +297,7 @@ gcc icecast_exploit.c -o icecast_exploit
 
 <br>
 
-<p>Okay! We need to identify the web server</p>
+<p>We need to identify the web server</p>
 
 
 ```
