@@ -21,7 +21,7 @@ The Most Important Ports here:
 - 8000 - HTTP Alterntive 
 
 <br>
-Alright, We need to check from versions:
+Alright, We need to check from their versions:
 <br>
 <br>
 
