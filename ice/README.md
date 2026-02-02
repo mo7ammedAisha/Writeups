@@ -285,7 +285,7 @@ Explore manual exploitation via exploit code found on exploit-db.
 
 <br><br>
  - You can see many exploits, I will choice "Icecast 2.0.1 (Win32) - Remote Code Execution (2)"
- - In this site, you will page PoC for the vulnerable written in C programming language
+ - In this site, you will see page PoC for the vulnerable written in C programming language
  - paste this code into a file in your local device "icecast_exploit.c"
  - compile the file then run the executable file
 ```c
