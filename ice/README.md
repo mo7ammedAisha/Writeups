@@ -4,7 +4,7 @@
 <p>Room: https://tryhackme.com/room/ice</p>
 
 
-<br><br>
+<br>
 
 ## Reconnaissance
 <p>First We need to Scan all ports and find all open ports:</p> <br>
