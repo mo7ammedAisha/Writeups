@@ -89,7 +89,7 @@ set LHOST <Your Local IP>
 
 <br><br>
 <p>
-Alright, but it's not enough privileges and architecture !!<br>
+We can't see the arc, user and path for almost process!!not enough privileges and architecture in this process!!<br>
 The architecture of ths process is x86 bit and the user is not the administrator (Dark) <br>
 While this doesn't work the best on x64 machines, let's now use post/multi/recon/local_exploit_suggester
 </p>
@@ -98,7 +98,7 @@ While this doesn't work the best on x64 machines, let's now use post/multi/recon
 
 
 <br><p>
-The previous Post-exploit suggests some exploits to get a better procees with better architecture <br>
+The previous Post-exploit suggests some exploits to get a better procees with better privileges <br>
 Let's use the 2nd exploit: exploit/windows/local/bypassuac_eventvwr
 </p> 
 
@@ -106,14 +106,14 @@ Let's use the 2nd exploit: exploit/windows/local/bypassuac_eventvwr
 
 <br><br><p>
 Now Let's check from the new process architecture by gepid and ps commands <br>
-Okay, We are using a thread from powershell.exe with better architecture x64 
+We are using a thread from powershell.exe and we can see the arc and user for all processes! 
 </p>
 
 ![Pic](screenshots/09.png)
 
 <br><br><p>
-Now Let's check the process privileges by usig getprivs command <br>
-Okay we have better privileges but it's not enough yet!
+Let's check the exact privileges that we can use. use getprivs command <br>
+We have better privileges but it's not enough yet! and the arc of powershell.exe is still x86
 </p>
 
 ![Pic](screenshots/10.png)
