@@ -4,7 +4,7 @@
 
 This document explains how to build a company network using Cisco Packet Tracer.
 The network has 5 routers, 5 switches, 4 servers, and 8 PCs.
-It uses VLANs, RIP routing (with one router using Static Routing), DHCP, DNS, Web, and Mail services.
+It uses VLANs, RIP routing (with demonstrations of Static Routing and Default Route), DHCP, DNS, Web, and Mail services.
 
 The routers are **Cisco 2911**. The switches are **Cisco 2960**.
 Follow each step carefully. You will be able to finish the whole project using only this guide.
@@ -29,6 +29,8 @@ Follow each step carefully. You will be able to finish the whole project using o
 11. [PC Configuration](#11-pc-configuration)
 12. [Testing and Verification](#12-testing-and-verification)
 13. [Bonus: Convert Router3 to Static Routing](#13-bonus-convert-router3-to-static-routing)
+14. [Bonus: Add a Default Route on Router4](#14-bonus-add-a-default-route-on-router4)
+15. [Live Presentation & Demo Guide](#15-live-presentation--demo-guide)
 
 ---
 
@@ -220,7 +222,7 @@ All departments can reach the servers through the routers.
 
 | Device      | Model      | Count | Purpose                          |
 |-------------|------------|-------|----------------------------------|
-| Routers     | Cisco 2911 | 5     | Connect networks, RIP + Static routing |
+| Routers     | Cisco 2911 | 5     | Connect networks, RIP + Static + Default routing |
 | Switches    | Cisco 2960 | 5     | Connect PCs within departments   |
 | Servers     | Server-PT  | 4     | DHCP, DNS, Web, Mail             |
 | PCs         | PC-PT      | 8     | End user devices (2 per dept)    |
@@ -1325,6 +1327,470 @@ If the ping fails, check:
 - Did you add all 7 static routes?
 - Did you save with `write memory`?
 - Run `show ip route` on Router3 to check.
+
+---
+
+## 14. Bonus: Add a Default Route on Router4
+
+### What is a Default Route?
+
+A **default route** (also called the "gateway of last resort") is a special route that tells a router:
+> "If you don't know where to send a packet, send it here."
+
+Instead of adding a specific route for every remote network, you configure one default route that covers everything unknown.
+
+In Cisco IOS, a default route looks like this:
+
+```
+ip route 0.0.0.0 0.0.0.0 <next-hop-ip>
+```
+
+The `0.0.0.0 0.0.0.0` means "match any destination" — it is the lowest-priority route and is only used when no more-specific route matches.
+
+In the routing table, a default route appears as:
+```
+S*    0.0.0.0/0 [1/0] via <next-hop-ip>
+```
+The **star (\*)** means it is the gateway of last resort.
+
+---
+
+### Why Router4?
+
+Router4 is a **transit router** with only 2 interfaces:
+- `GigabitEthernet0/0` = `10.0.1.2/30` → connects to **Router2**
+- `GigabitEthernet0/1` = `10.0.3.1/30` → connects to **Router5**
+
+Router4 has only **one path to most of the network**: through Router5 (next-hop `10.0.3.2`).
+
+The only exception is Router2's LANs — Finance VLAN (`192.168.30.0/24`) and Sales VLAN (`192.168.40.0/24`) — which are reachable directly via Router2 (next-hop `10.0.1.1`).
+
+**Strategy:**
+- Keep 2 **specific static routes** for Router2's LANs (Finance and Sales)
+- Use one **default route** for everything else → Router5
+
+This is more efficient than listing every remote network individually.
+
+---
+
+### Static Route Table for Router4
+
+| # | Destination Network | Subnet Mask       | Next-Hop IP | Type    | Explanation                                    |
+|---|--------------------|--------------------|-------------|---------|------------------------------------------------|
+| 1 | 192.168.30.0       | 255.255.255.0     | 10.0.1.1    | Static  | Finance VLAN — via Router2                    |
+| 2 | 192.168.40.0       | 255.255.255.0     | 10.0.1.1    | Static  | Sales VLAN — via Router2                      |
+| 3 | 0.0.0.0            | 0.0.0.0           | 10.0.3.2    | Default | Everything else — via Router5                  |
+
+---
+
+### Step-by-Step Instructions
+
+**Step 1:** Open the CLI.
+
+Click on Router4 → click the **CLI** tab → press Enter.
+
+**Step 2:** Enter configuration mode.
+
+```
+Router4> enable
+Router4# configure terminal
+```
+
+**Step 3:** Remove RIP from Router4.
+
+```
+Router4(config)# no router rip
+```
+
+> This removes all RIP configuration from Router4. After this, Router4 has no routing protocol. It only knows about its directly connected networks (`10.0.1.0/30` and `10.0.3.0/30`).
+
+**Step 4:** Add 2 specific static routes for Router2's LANs.
+
+```
+Router4(config)# ip route 192.168.30.0 255.255.255.0 10.0.1.1
+Router4(config)# ip route 192.168.40.0 255.255.255.0 10.0.1.1
+```
+
+**Step 5:** Add the default route (for everything else → Router5).
+
+```
+Router4(config)# ip route 0.0.0.0 0.0.0.0 10.0.3.2
+```
+
+**Step 6:** Save the configuration.
+
+```
+Router4(config)# end
+Router4# write memory
+```
+
+**Step 7:** Verify the routing table.
+
+```
+Router4# show ip route
+```
+
+You should see:
+- `S*   0.0.0.0/0 [1/0] via 10.0.3.2` — the default route (the star means gateway of last resort)
+- `S    192.168.30.0/24 [1/0] via 10.0.1.1` — specific static route for Finance
+- `S    192.168.40.0/24 [1/0] via 10.0.1.1` — specific static route for Sales
+- `C    10.0.1.0/30` and `C    10.0.3.0/30` — directly connected networks
+
+---
+
+### Verification
+
+1. Open **HR-PC1** → Desktop → Command Prompt.
+2. Type: `ping 192.168.30.100` (Finance PC). You should get a reply.
+3. Type: `ping 192.168.40.100` (Sales PC). You should get a reply.
+4. Type: `ping 192.168.50.10` (DHCP Server). You should get a reply.
+
+If the ping fails, check:
+- Did you type `no router rip` on Router4?
+- Did you add both specific static routes and the default route?
+- Did you save with `write memory`?
+- Run `show ip route` on Router4 to check.
+
+---
+
+### Important Notes
+
+> **Do NOT change Router1, Router2, Router3, or Router5.** Only Router4 is modified in this section.
+>
+> Router4's directly connected networks (`10.0.1.0/30` and `10.0.3.0/30`) are already known by adjacent routers. The default route ensures that all other traffic is forwarded to Router5, which has full knowledge of the network through RIP.
+
+---
+
+## 15. Live Presentation & Demo Guide
+
+*(شرح المشروع)*
+
+This guide helps you present the project to your class or instructor. Each part tells you what to do, which commands to run, and what to say. Arabic translation hints are included to help you explain in Arabic if needed.
+
+**Estimated total time: ~15 minutes**
+
+---
+
+### Part 1: Opening (30 seconds)
+
+**What to do:** Point to the topology diagram in Packet Tracer.
+
+**What to say:**
+> "This is a company network with 4 departments, 5 routers, 5 switches, 4 servers, and 8 PCs."
+
+*(بالعربي: "هذه شبكة شركة تحتوي على 4 أقسام، 5 راوترات، 5 سويتشات، 4 سيرفرات، و8 أجهزة كمبيوتر.")*
+
+> "The network uses a chain design: Router1 and Router2 connect the departments, and they link through Router3 and Router4 to Router5, which connects the servers."
+
+*(بالعربي: "الشبكة مصممة على شكل سلسلة: Router1 وRouter2 يوصلان الأقسام، وهما متصلان عبر Router3 وRouter4 بـ Router5 الذي يوصل السيرفرات.")*
+
+---
+
+### Part 2: Show the Physical Topology (1 minute)
+
+**What to do:** Click on each device and show its type.
+
+**What to say:**
+> "These are Cisco 2911 routers. They handle routing between networks."
+
+*(بالعربي: "هذه راوترات Cisco 2911. تقوم بتوجيه البيانات بين الشبكات.")*
+
+> "These are Cisco 2960 switches. They connect the PCs inside each department."
+
+*(بالعربي: "هذه سويتشات Cisco 2960. تربط الأجهزة داخل كل قسم.")*
+
+> "The cables between routers are crossover cables. The cables from routers to switches are straight-through cables."
+
+*(بالعربي: "الكابلات بين الراوترات كروس-أوفر. الكابلات من الراوتر إلى السويتش ستريت-ثرو.")*
+
+---
+
+### Part 3: Explain VLANs (2 minutes)
+
+**What to do:** Click on Switch1 → CLI tab.
+
+**Commands to run:**
+```
+Switch1# show vlan brief
+```
+
+**What to say:**
+> "Each department is on a separate VLAN for security and organization."
+
+*(بالعربي: "كل قسم على VLAN منفصل للأمان والتنظيم.")*
+
+- VLAN 10 = HR
+- VLAN 20 = IT
+- VLAN 30 = Finance
+- VLAN 40 = Sales
+- VLAN 50 = Servers
+
+**Then run:**
+```
+Switch1# show interfaces trunk
+```
+
+**What to say:**
+> "The trunk port carries traffic for all VLANs between the switch and router. One cable, multiple VLANs."
+
+*(بالعربي: "البورت الترانك يحمل كل الـVLANs على كابل واحد بين السويتش والراوتر.")*
+
+---
+
+### Part 4: Explain Router-on-a-Stick (1 minute)
+
+**What to do:** Click on Router1 → CLI tab.
+
+**Commands to run:**
+```
+Router1# show ip interface brief
+```
+
+**What to say:**
+> "Router-on-a-stick means one physical cable carries multiple VLANs using sub-interfaces."
+
+*(بالعربي: "Router-on-a-stick يعني كابل واحد يحمل عدة VLANs باستخدام Sub-interfaces.")*
+
+> "GigabitEthernet0/0.10 handles VLAN 10 (HR), and GigabitEthernet0/2.20 handles VLAN 20 (IT)."
+
+> "Each sub-interface uses encapsulation dot1Q to tag the VLAN traffic."
+
+*(بالعربي: "كل Sub-interface يستخدم dot1Q لتمييز الـVLAN.")*
+
+---
+
+### Part 5: Explain IP Addressing (1 minute)
+
+**What to say:**
+> "LAN networks use /24 subnets — that gives 254 usable addresses for PCs."
+
+*(بالعربي: "شبكات الـLAN تستخدم /24 — توفر 254 عنوان للأجهزة.")*
+
+> "WAN links between routers use /30 subnets — that gives only 2 usable addresses, which is exactly what we need for a point-to-point link."
+
+*(بالعربي: "الـWAN بين الراوترات تستخدم /30 — توفر عنوانين فقط لأن الـWAN نقطة لنقطة.")*
+
+> "The servers have static IPs in the 192.168.50.x range."
+
+*(بالعربي: "السيرفرات لها عناوين ثابتة في نطاق 192.168.50.x.")*
+
+---
+
+### Part 6: Show RIP Routing (2 minutes)
+
+**What to do:** Click on Router1 → CLI tab.
+
+**Commands to run:**
+```
+Router1# show ip route
+```
+
+**What to say:**
+> "The letter R means the route was learned by RIP — the router discovered it automatically."
+
+*(بالعربي: "الحرف R يعني أن الراوتر تعلّم هذا المسار تلقائياً عبر بروتوكول RIP.")*
+
+> "Router1 can see remote networks: 192.168.30.0 (Finance), 192.168.40.0 (Sales), 192.168.50.0 (Servers) — even though it is not directly connected to them."
+
+**Then run:**
+```
+Router1# show ip rip database
+```
+
+**What to say:**
+> "RIP version 2 supports subnet masks and is simple to configure. It shares routing information with neighboring routers every 30 seconds."
+
+*(بالعربي: "RIP نسخة 2 يدعم الـSubnet Masks وسهل الإعداد. يشارك معلومات التوجيه مع الراوترات المجاورة كل 30 ثانية.")*
+
+---
+
+### Part 7: Show Static Routing on Router3 (1 minute)
+
+> **Note:** This step applies only if you completed Section 13 (converting Router3 to static routes). If Router3 still uses RIP, skip this part.
+
+**What to do:** Click on Router3 → CLI tab.
+
+**Commands to run:**
+```
+Router3# show ip route
+```
+
+**What to say:**
+> "The letter S means static route — I configured each route manually instead of using a routing protocol."
+
+*(بالعربي: "الحرف S يعني مسار ثابت — قمت بإعداده يدوياً بدلاً من استخدام بروتوكول توجيه.")*
+
+> "There are no R routes on Router3 — it does not use RIP. All routes were added by hand."
+
+*(بالعربي: "لا يوجد حرف R على Router3 — لا يستخدم RIP. كل المسارات تم إضافتها يدوياً.")*
+
+---
+
+### Part 8: Show Default Route on Router4 (1 minute)
+
+> **Note:** This step applies only if you completed Section 14 (adding a default route on Router4). If Router4 still uses RIP, skip this part.
+
+**What to do:** Click on Router4 → CLI tab.
+
+**Commands to run:**
+```
+Router4# show ip route
+```
+
+**What to say:**
+> "S* means default route — the gateway of last resort."
+
+*(بالعربي: "S* تعني المسار الافتراضي — البوابة الأخيرة.")*
+
+> "Instead of adding a route for every network, one default route sends all unknown traffic to Router5. It is simpler and more scalable."
+
+*(بالعربي: "بدلاً من إضافة مسار لكل شبكة، مسار افتراضي واحد يرسل كل حركة المرور غير المعروفة إلى Router5.")*
+
+---
+
+### Part 9: Show DHCP Working (1 minute)
+
+**What to do:** Click on HR-PC1 → Desktop tab → IP Configuration.
+
+1. Select **DHCP**.
+2. Wait a few seconds.
+3. Show that the PC received an IP address automatically (e.g., `192.168.10.100`).
+
+**What to say:**
+> "DHCP gives IP addresses automatically. The DHCP server is on VLAN 50, but it serves all VLANs because the routers use ip helper-address to forward DHCP requests."
+
+*(بالعربي: "DHCP يعطي عناوين IP تلقائياً. سيرفر الـDHCP في VLAN 50 لكنه يخدم كل الـVLANs لأن الراوترات تستخدم ip helper-address لإعادة توجيه الطلبات.")*
+
+---
+
+### Part 10: Show DNS Working (1 minute)
+
+**What to do:** Click on any PC → Desktop → Command Prompt.
+
+**Command to run:**
+```
+nslookup www.company.com
+```
+
+**What to say:**
+> "The DNS server translates the domain name www.company.com into the IP address 192.168.50.30. Without DNS, you would have to remember IP addresses instead of names."
+
+*(بالعربي: "سيرفر DNS يترجم اسم النطاق www.company.com إلى عنوان IP 192.168.50.30.")*
+
+---
+
+### Part 11: Show Web Server Working (30 seconds)
+
+**What to do:** Click on any PC → Desktop → Web Browser.
+
+**Type in the address bar:**
+```
+http://www.company.com
+```
+
+**What to say:**
+> "The PC asks the DNS server for the IP, then connects to the web server. The web page loads successfully."
+
+*(بالعربي: "الجهاز يسأل DNS عن الـIP ثم يتصل بسيرفر الويب. الصفحة تظهر بنجاح.")*
+
+---
+
+### Part 12: Show Email Server Working (30 seconds)
+
+**What to do:** Click on Mail-Server → Services tab → EMAIL.
+
+**What to show:**
+- Domain: `company.com`
+- User account: `admin` (or similar)
+
+**What to say:**
+> "The mail server uses SMTP to send emails and POP3 to receive them. The domain is company.com."
+
+*(بالعربي: "سيرفر البريد يستخدم SMTP للإرسال وPOP3 للاستقبال. النطاق هو company.com.")*
+
+---
+
+### Part 13: Test Connectivity Between Departments (2 minutes)
+
+**This is the most important part of the demo.**
+
+**What to do:** Click on HR-PC1 → Desktop → Command Prompt.
+
+**Run these ping commands:**
+
+```
+ping 192.168.10.1
+```
+> Expected: Success — this is the gateway (Router1).
+
+*(بالعربي: "هذا البينج للـGateway — يجب أن ينجح.")*
+
+```
+ping 192.168.20.100
+```
+> Expected: Success — this is an IT PC.
+
+*(بالعربي: "بينج لجهاز في قسم IT.")*
+
+```
+ping 192.168.30.100
+```
+> Expected: Success — this is a Finance PC.
+
+*(بالعربي: "بينج لجهاز في قسم المالية.")*
+
+```
+ping 192.168.50.10
+```
+> Expected: Success — this is the DHCP server.
+
+*(بالعربي: "بينج لسيرفر الـDHCP.")*
+
+```
+ping 192.168.50.30
+```
+> Expected: Success — this is the Web server.
+
+*(بالعربي: "بينج لسيرفر الويب.")*
+
+**What to say:**
+> "All departments can communicate with each other and with the servers. The VLANs provide logical separation, and the routers connect them all together."
+
+*(بالعربي: "كل الأقسام تستطيع التواصل مع بعضها ومع السيرفرات. الـVLANs توفر الفصل المنطقي، والراوترات تربطهم جميعاً.")*
+
+---
+
+### Part 14: Summary Statement (30 seconds)
+
+**What to say:**
+> "This project demonstrates:
+> - VLANs for network segmentation
+> - Router-on-a-stick for inter-VLAN routing
+> - Three types of routing: RIP (dynamic), Static Routes, and Default Route
+> - DHCP for automatic IP assignment with relay across VLANs
+> - DNS for name resolution
+> - Web and Mail server services
+> - Full connectivity between all departments and servers"
+
+*(بالعربي: "هذا المشروع يوضح: الـVLANs لتقسيم الشبكة، الـRouter-on-a-stick للتوجيه بين الـVLANs، ثلاثة أنواع من التوجيه (RIP الديناميكي، والمسارات الثابتة، والمسار الافتراضي)، الـDHCP للـIPs التلقائية، الـDNS لترجمة الأسماء، وسيرفرات الويب والبريد، وتواصل كامل بين جميع الأقسام والسيرفرات.")*
+
+---
+
+### Quick-Reference Checklist
+
+| Step | What to Show | Command / Action | What to Say |
+|------|-------------|-----------------|-------------|
+| 1 | Topology | Point to diagram | "Company network, 4 departments..." |
+| 2 | VLANs | `show vlan brief` on Switch1 | "Each dept has its own VLAN" |
+| 3 | Trunk | `show interfaces trunk` on Switch1 | "Trunk carries all VLANs" |
+| 4 | Router-on-a-Stick | `show ip interface brief` on Router1 | "Sub-interfaces for each VLAN" |
+| 5 | RIP | `show ip route` on Router1 | "R = learned by RIP" |
+| 6 | Static Routes | `show ip route` on Router3 | "S = manual static route" |
+| 7 | Default Route | `show ip route` on Router4 | "S* = default route" |
+| 8 | DHCP | IP Config on HR-PC1 | "Auto IP via DHCP relay" |
+| 9 | DNS | `nslookup www.company.com` | "DNS resolves names" |
+| 10 | Web | Browser → www.company.com | "Web server works" |
+| 11 | Ping Test | `ping` from HR-PC1 | "Full connectivity proven" |
 
 ---
 
