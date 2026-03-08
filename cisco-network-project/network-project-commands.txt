@@ -211,7 +211,7 @@ write memory
 ================================================================
  ROUTER 3 CONFIGURATION
  Model : Cisco 2911
- Role  : Transit router (connects Router1 to Router5)
+ Role  : Transit router — STATIC ROUTING (no RIP)
  Gig0/0 = 10.0.0.2/30  -> Router1 GigabitEthernet0/1
  Gig0/1 = 10.0.2.1/30  -> Router5 GigabitEthernet0/0
 ================================================================
@@ -237,13 +237,28 @@ interface GigabitEthernet0/1
  no shutdown
  exit
 
-! --- Configure RIP version 2 ---
-router rip
- version 2
- no auto-summary
- network 10.0.0.0
- network 10.0.2.0
- exit
+! --- Static Routes (no RIP on this router) ---
+
+! Route to HR VLAN (via Router1)
+ip route 192.168.10.0 255.255.255.0 10.0.0.1
+
+! Route to IT VLAN (via Router1)
+ip route 192.168.20.0 255.255.255.0 10.0.0.1
+
+! Route to Finance VLAN (via Router5)
+ip route 192.168.30.0 255.255.255.0 10.0.2.2
+
+! Route to Sales VLAN (via Router5)
+ip route 192.168.40.0 255.255.255.0 10.0.2.2
+
+! Route to Server Room VLAN (via Router5)
+ip route 192.168.50.0 255.255.255.0 10.0.2.2
+
+! Route to R2-R4 WAN link (via Router5)
+ip route 10.0.1.0 255.255.255.252 10.0.2.2
+
+! Route to R4-R5 WAN link (via Router5)
+ip route 10.0.3.0 255.255.255.252 10.0.2.2
 
 ! --- Save configuration ---
 end
@@ -690,6 +705,55 @@ Mail-Server:
 
   www.company.com   A   192.168.50.30
   mail.company.com  A   192.168.50.40
+
+
+================================================================
+ SECTION 13 — CONVERT ROUTER3 FROM RIP TO STATIC ROUTING
+ (Run these commands ONLY if Router3 already has RIP configured
+  and you want to switch it to static routes)
+================================================================
+
+! --- Enter privileged mode ---
+enable
+
+! --- Enter global configuration mode ---
+configure terminal
+
+! --- Remove RIP from Router3 ---
+no router rip
+
+! --- Add static routes ---
+
+! Route to HR VLAN (via Router1)
+ip route 192.168.10.0 255.255.255.0 10.0.0.1
+
+! Route to IT VLAN (via Router1)
+ip route 192.168.20.0 255.255.255.0 10.0.0.1
+
+! Route to Finance VLAN (via Router5)
+ip route 192.168.30.0 255.255.255.0 10.0.2.2
+
+! Route to Sales VLAN (via Router5)
+ip route 192.168.40.0 255.255.255.0 10.0.2.2
+
+! Route to Server Room VLAN (via Router5)
+ip route 192.168.50.0 255.255.255.0 10.0.2.2
+
+! Route to R2-R4 WAN link (via Router5)
+ip route 10.0.1.0 255.255.255.252 10.0.2.2
+
+! Route to R4-R5 WAN link (via Router5)
+ip route 10.0.3.0 255.255.255.252 10.0.2.2
+
+! --- Save configuration ---
+end
+write memory
+
+! --- Verify: check routing table ---
+show ip route
+
+! NOTE: No changes needed on Router1, Router2, Router4, or Router5.
+!       They all keep using RIP.
 
 
 ================================================================
