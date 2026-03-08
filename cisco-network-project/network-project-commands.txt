@@ -1,39 +1,96 @@
 ================================================================
  CISCO PACKET TRACER — COMPANY NETWORK PROJECT
- All CLI Commands from Start to Finish
- Organized by Device
- Ready to Copy-Paste into Packet Tracer Console
+ All CLI Commands — Ready to Copy-Paste
+ Device Models: Router = Cisco 2911 | Switch = Cisco 2960
 ================================================================
 
 ----------------------------------------------------------------
  NETWORK SUMMARY
 ----------------------------------------------------------------
- 5 Routers  : Router1, Router2, Router3, Router4, Router5
- 5 Switches : Switch1 (HR), Switch2 (IT), Switch3 (Finance),
-              Switch4 (Sales), Switch5 (Servers)
- 4 Servers  : DHCP (192.168.50.10), DNS (192.168.50.20),
-              Web (192.168.50.30), Mail (192.168.50.40)
+ 5 Routers  (Cisco 2911): Router1, Router2, Router3, Router4,
+                           Router5
+ 5 Switches (Cisco 2960): Switch1 (HR), Switch2 (IT),
+                           Switch3 (Finance), Switch4 (Sales),
+                           Switch5 (Servers)
+ 4 Servers  (Server-PT) : DHCP-Server  (192.168.50.10)
+                           DNS-Server   (192.168.50.20)
+                           Web-Server   (192.168.50.30)
+                           Mail-Server  (192.168.50.40)
+ 8 PCs      (PC-PT)     : HR-PC1/2, IT-PC1/2, Finance-PC1/2,
+                           Sales-PC1/2
 
- VLANs:
-   VLAN 10 = HR         (192.168.10.0/24, GW: 192.168.10.1)
-   VLAN 20 = IT         (192.168.20.0/24, GW: 192.168.20.1)
-   VLAN 30 = Finance    (192.168.30.0/24, GW: 192.168.30.1)
-   VLAN 40 = Sales      (192.168.40.0/24, GW: 192.168.40.1)
-   VLAN 50 = Servers    (192.168.50.0/24, GW: 192.168.50.1)
+----------------------------------------------------------------
+ VLANs
+----------------------------------------------------------------
+  VLAN 10 = HR         (192.168.10.0/24, GW: 192.168.10.1)
+  VLAN 20 = IT         (192.168.20.0/24, GW: 192.168.20.1)
+  VLAN 30 = Finance    (192.168.30.0/24, GW: 192.168.30.1)
+  VLAN 40 = Sales      (192.168.40.0/24, GW: 192.168.40.1)
+  VLAN 50 = Servers    (192.168.50.0/24, GW: 192.168.50.1)
 
- WAN Links (Point-to-Point /30 subnets):
-   R5 <-> R1 : 10.0.0.0/30  (R5=10.0.0.1, R1=10.0.0.2)
-   R5 <-> R2 : 10.0.1.0/30  (R5=10.0.1.1, R2=10.0.1.2)
-   R5 <-> R3 : 10.0.2.0/30  (R5=10.0.2.1, R3=10.0.2.2)
-   R5 <-> R4 : 10.0.3.0/30  (R5=10.0.3.1, R4=10.0.3.2)
+----------------------------------------------------------------
+ WAN LINKS (Point-to-Point /30 subnets)
+----------------------------------------------------------------
+  R1 <-> R3 : 10.0.0.0/30  (R1=10.0.0.1,  R3=10.0.0.2)
+  R2 <-> R4 : 10.0.1.0/30  (R2=10.0.1.1,  R4=10.0.1.2)
+  R3 <-> R5 : 10.0.2.0/30  (R3=10.0.2.1,  R5=10.0.2.2)
+  R4 <-> R5 : 10.0.3.0/30  (R4=10.0.3.1,  R5=10.0.3.2)
+
+----------------------------------------------------------------
+ INTERFACE MAP (Cisco 2911 uses GigabitEthernet)
+----------------------------------------------------------------
+  Router1 : Gig0/0 -> Switch1 (HR VLAN 10)
+            Gig0/1 -> Router3 (WAN 10.0.0.0/30)
+            Gig0/2 -> Switch2 (IT VLAN 20)
+
+  Router2 : Gig0/0 -> Switch3 (Finance VLAN 30)
+            Gig0/1 -> Router4 (WAN 10.0.1.0/30)
+            Gig0/2 -> Switch4 (Sales VLAN 40)
+
+  Router3 : Gig0/0 -> Router1 (WAN 10.0.0.0/30)
+            Gig0/1 -> Router5 (WAN 10.0.2.0/30)
+
+  Router4 : Gig0/0 -> Router2 (WAN 10.0.1.0/30)
+            Gig0/1 -> Router5 (WAN 10.0.3.0/30)
+
+  Router5 : Gig0/0 -> Router3 (WAN 10.0.2.0/30)
+            Gig0/1 -> Router4 (WAN 10.0.3.0/30)
+            Gig0/2 -> Switch5 (Server Room VLAN 50)
+
+----------------------------------------------------------------
+ CABLE TABLE
+----------------------------------------------------------------
+  Cable 1 : Router1 Gig0/0     <-> Switch1 Fa0/1  [Straight]
+  Cable 2 : Router1 Gig0/1     <-> Router3 Gig0/0 [Crossover]
+  Cable 3 : Router1 Gig0/2     <-> Switch2 Fa0/1  [Straight]
+  Cable 4 : Router2 Gig0/0     <-> Switch3 Fa0/1  [Straight]
+  Cable 5 : Router2 Gig0/1     <-> Router4 Gig0/0 [Crossover]
+  Cable 6 : Router2 Gig0/2     <-> Switch4 Fa0/1  [Straight]
+  Cable 7 : Router3 Gig0/1     <-> Router5 Gig0/0 [Crossover]
+  Cable 8 : Router4 Gig0/1     <-> Router5 Gig0/1 [Crossover]
+  Cable 9 : Router5 Gig0/2     <-> Switch5 Fa0/1  [Straight]
+  Cable 10: Switch1 Fa0/2      <-> HR-PC1 Fa0      [Straight]
+  Cable 11: Switch1 Fa0/3      <-> HR-PC2 Fa0      [Straight]
+  Cable 12: Switch2 Fa0/2      <-> IT-PC1 Fa0      [Straight]
+  Cable 13: Switch2 Fa0/3      <-> IT-PC2 Fa0      [Straight]
+  Cable 14: Switch3 Fa0/2      <-> Finance-PC1 Fa0 [Straight]
+  Cable 15: Switch3 Fa0/3      <-> Finance-PC2 Fa0 [Straight]
+  Cable 16: Switch4 Fa0/2      <-> Sales-PC1 Fa0   [Straight]
+  Cable 17: Switch4 Fa0/3      <-> Sales-PC2 Fa0   [Straight]
+  Cable 18: Switch5 Fa0/2      <-> DHCP-Server Fa0 [Straight]
+  Cable 19: Switch5 Fa0/3      <-> DNS-Server Fa0  [Straight]
+  Cable 20: Switch5 Fa0/4      <-> Web-Server Fa0  [Straight]
+  Cable 21: Switch5 Fa0/5      <-> Mail-Server Fa0 [Straight]
 ----------------------------------------------------------------
 
 
 ================================================================
  ROUTER 1 CONFIGURATION
- Role: Gateway for HR (VLAN 10) and IT (VLAN 20)
- WAN: 10.0.0.2/30 connected to Router5
- LAN: Fa0/0 (trunk) to Switch1 and Switch2
+ Model  : Cisco 2911
+ Role   : Gateway for HR (VLAN 10) and IT (VLAN 20)
+ WAN    : GigabitEthernet0/1 = 10.0.0.1/30 -> Router3
+ LAN HR : GigabitEthernet0/0.10 = 192.168.10.1/24 -> Switch1
+ LAN IT : GigabitEthernet0/2.20 = 192.168.20.1/24 -> Switch2
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -45,26 +102,31 @@ configure terminal
 ! --- Set hostname ---
 hostname Router1
 
-! --- Configure WAN interface to Router5 ---
-interface FastEthernet0/1
- ip address 10.0.0.2 255.255.255.252
+! --- Configure WAN interface to Router3 ---
+interface GigabitEthernet0/1
+ ip address 10.0.0.1 255.255.255.252
  no shutdown
  exit
 
-! --- Enable LAN interface (no IP directly — use sub-interfaces) ---
-interface FastEthernet0/0
+! --- Enable LAN interface for HR (Switch1) ---
+interface GigabitEthernet0/0
  no shutdown
  exit
 
 ! --- Sub-interface for HR VLAN 10 ---
-interface FastEthernet0/0.10
+interface GigabitEthernet0/0.10
  encapsulation dot1Q 10
  ip address 192.168.10.1 255.255.255.0
  ip helper-address 192.168.50.10
  exit
 
+! --- Enable LAN interface for IT (Switch2) ---
+interface GigabitEthernet0/2
+ no shutdown
+ exit
+
 ! --- Sub-interface for IT VLAN 20 ---
-interface FastEthernet0/0.20
+interface GigabitEthernet0/2.20
  encapsulation dot1Q 20
  ip address 192.168.20.1 255.255.255.0
  ip helper-address 192.168.50.10
@@ -86,9 +148,11 @@ write memory
 
 ================================================================
  ROUTER 2 CONFIGURATION
- Role: Gateway for Finance (VLAN 30) and Sales (VLAN 40)
- WAN: 10.0.1.2/30 connected to Router5
- LAN: Fa0/0 (trunk) to Switch3 and Switch4
+ Model    : Cisco 2911
+ Role     : Gateway for Finance (VLAN 30) and Sales (VLAN 40)
+ WAN      : GigabitEthernet0/1 = 10.0.1.1/30 -> Router4
+ LAN Fin. : GigabitEthernet0/0.30 = 192.168.30.1/24 -> Switch3
+ LAN Sales: GigabitEthernet0/2.40 = 192.168.40.1/24 -> Switch4
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -100,26 +164,31 @@ configure terminal
 ! --- Set hostname ---
 hostname Router2
 
-! --- Configure WAN interface to Router5 ---
-interface FastEthernet0/1
- ip address 10.0.1.2 255.255.255.252
+! --- Configure WAN interface to Router4 ---
+interface GigabitEthernet0/1
+ ip address 10.0.1.1 255.255.255.252
  no shutdown
  exit
 
-! --- Enable LAN interface ---
-interface FastEthernet0/0
+! --- Enable LAN interface for Finance (Switch3) ---
+interface GigabitEthernet0/0
  no shutdown
  exit
 
 ! --- Sub-interface for Finance VLAN 30 ---
-interface FastEthernet0/0.30
+interface GigabitEthernet0/0.30
  encapsulation dot1Q 30
  ip address 192.168.30.1 255.255.255.0
  ip helper-address 192.168.50.10
  exit
 
+! --- Enable LAN interface for Sales (Switch4) ---
+interface GigabitEthernet0/2
+ no shutdown
+ exit
+
 ! --- Sub-interface for Sales VLAN 40 ---
-interface FastEthernet0/0.40
+interface GigabitEthernet0/2.40
  encapsulation dot1Q 40
  ip address 192.168.40.1 255.255.255.0
  ip helper-address 192.168.50.10
@@ -141,11 +210,10 @@ write memory
 
 ================================================================
  ROUTER 3 CONFIGURATION
- Role: Extra/Backup Router (5th router in the topology)
- WAN: 10.0.2.2/30 connected to Router5
- Note: This router participates in RIP and provides
-       redundancy. No LAN sub-interfaces needed unless
-       you attach extra switches to it.
+ Model : Cisco 2911
+ Role  : Transit router (connects Router1 to Router5)
+ Gig0/0 = 10.0.0.2/30  -> Router1 GigabitEthernet0/1
+ Gig0/1 = 10.0.2.1/30  -> Router5 GigabitEthernet0/0
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -157,9 +225,15 @@ configure terminal
 ! --- Set hostname ---
 hostname Router3
 
-! --- Configure WAN interface to Router5 ---
-interface FastEthernet0/1
- ip address 10.0.2.2 255.255.255.252
+! --- Interface to Router1 (WAN link) ---
+interface GigabitEthernet0/0
+ ip address 10.0.0.2 255.255.255.252
+ no shutdown
+ exit
+
+! --- Interface to Router5 (WAN link) ---
+interface GigabitEthernet0/1
+ ip address 10.0.2.1 255.255.255.252
  no shutdown
  exit
 
@@ -167,6 +241,7 @@ interface FastEthernet0/1
 router rip
  version 2
  no auto-summary
+ network 10.0.0.0
  network 10.0.2.0
  exit
 
@@ -177,9 +252,10 @@ write memory
 
 ================================================================
  ROUTER 4 CONFIGURATION
- Role: Extra/Backup Router (5th path for redundancy)
- WAN: 10.0.3.2/30 connected to Router5
- Note: Like Router3, participates in RIP for redundancy.
+ Model : Cisco 2911
+ Role  : Transit router (connects Router2 to Router5)
+ Gig0/0 = 10.0.1.2/30  -> Router2 GigabitEthernet0/1
+ Gig0/1 = 10.0.3.1/30  -> Router5 GigabitEthernet0/1
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -191,9 +267,15 @@ configure terminal
 ! --- Set hostname ---
 hostname Router4
 
-! --- Configure WAN interface to Router5 ---
-interface FastEthernet0/1
- ip address 10.0.3.2 255.255.255.252
+! --- Interface to Router2 (WAN link) ---
+interface GigabitEthernet0/0
+ ip address 10.0.1.2 255.255.255.252
+ no shutdown
+ exit
+
+! --- Interface to Router5 (WAN link) ---
+interface GigabitEthernet0/1
+ ip address 10.0.3.1 255.255.255.252
  no shutdown
  exit
 
@@ -201,6 +283,7 @@ interface FastEthernet0/1
 router rip
  version 2
  no auto-summary
+ network 10.0.1.0
  network 10.0.3.0
  exit
 
@@ -211,13 +294,12 @@ write memory
 
 ================================================================
  ROUTER 5 CONFIGURATION
- Role: Core Router — connects all other routers and Servers
- Interfaces:
-   Fa0/0  -> Router1  : 10.0.0.1/30
-   Fa0/1  -> Router2  : 10.0.1.1/30
-   Fa1/0  -> Router3  : 10.0.2.1/30
-   Fa1/1  -> Router4  : 10.0.3.1/30
-   Fa2/0  -> Switch5 (Server Room, VLAN 50)
+ Model  : Cisco 2911
+ Role   : Core router — connects Router3, Router4, and Servers
+ Gig0/0 = 10.0.2.2/30   -> Router3 GigabitEthernet0/1
+ Gig0/1 = 10.0.3.2/30   -> Router4 GigabitEthernet0/1
+ Gig0/2 = trunk          -> Switch5 (Server Room, VLAN 50)
+ Gig0/2.50 = 192.168.50.1/24
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -229,47 +311,33 @@ configure terminal
 ! --- Set hostname ---
 hostname Router5
 
-! --- Interface to Router1 (WAN link) ---
-interface FastEthernet0/0
- ip address 10.0.0.1 255.255.255.252
- no shutdown
- exit
-
-! --- Interface to Router2 (WAN link) ---
-interface FastEthernet0/1
- ip address 10.0.1.1 255.255.255.252
- no shutdown
- exit
-
 ! --- Interface to Router3 (WAN link) ---
-interface FastEthernet1/0
- ip address 10.0.2.1 255.255.255.252
+interface GigabitEthernet0/0
+ ip address 10.0.2.2 255.255.255.252
  no shutdown
  exit
 
 ! --- Interface to Router4 (WAN link) ---
-interface FastEthernet1/1
- ip address 10.0.3.1 255.255.255.252
+interface GigabitEthernet0/1
+ ip address 10.0.3.2 255.255.255.252
  no shutdown
  exit
 
 ! --- Enable Server Room interface (trunk to Switch5) ---
-interface FastEthernet2/0
+interface GigabitEthernet0/2
  no shutdown
  exit
 
 ! --- Sub-interface for Server Room VLAN 50 ---
-interface FastEthernet2/0.50
+interface GigabitEthernet0/2.50
  encapsulation dot1Q 50
  ip address 192.168.50.1 255.255.255.0
  exit
 
-! --- Configure RIP version 2 — advertise ALL networks ---
+! --- Configure RIP version 2 — advertise all networks ---
 router rip
  version 2
  no auto-summary
- network 10.0.0.0
- network 10.0.1.0
  network 10.0.2.0
  network 10.0.3.0
  network 192.168.50.0
@@ -282,11 +350,12 @@ write memory
 
 ================================================================
  SWITCH 1 CONFIGURATION
- Department: HR
- VLANs: VLAN 10 (HR)
- Fa0/1 -> Router1 (trunk uplink)
- Fa0/2 -> HR-PC1  (access, VLAN 10)
- Fa0/3 -> HR-PC2  (access, VLAN 10)
+ Model      : Cisco 2960
+ Department : HR
+ VLAN       : VLAN 10
+ Fa0/1      -> Router1 GigabitEthernet0/0 (trunk uplink)
+ Fa0/2      -> HR-PC1  (access, VLAN 10)
+ Fa0/3      -> HR-PC2  (access, VLAN 10)
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -298,28 +367,26 @@ configure terminal
 ! --- Set hostname ---
 hostname Switch1
 
-! --- Create VLAN 10 for HR department ---
+! --- Create VLAN 10 ---
 vlan 10
  name HR
  exit
 
-! --- Configure access port for HR-PC1 ---
+! --- Trunk port (uplink to Router1 GigabitEthernet0/0) ---
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! --- Access port for HR-PC1 ---
 interface FastEthernet0/2
  switchport mode access
  switchport access vlan 10
  exit
 
-! --- Configure access port for HR-PC2 ---
+! --- Access port for HR-PC2 ---
 interface FastEthernet0/3
  switchport mode access
  switchport access vlan 10
- exit
-
-! --- Configure trunk port to Router1 (uplink) ---
-interface FastEthernet0/1
- switchport mode trunk
- switchport trunk native vlan 1
- switchport trunk allowed vlan all
  exit
 
 ! --- Save configuration ---
@@ -329,11 +396,12 @@ write memory
 
 ================================================================
  SWITCH 2 CONFIGURATION
- Department: IT
- VLANs: VLAN 20 (IT)
- Fa0/1 -> Router1 (trunk uplink)
- Fa0/2 -> IT-PC1  (access, VLAN 20)
- Fa0/3 -> IT-PC2  (access, VLAN 20)
+ Model      : Cisco 2960
+ Department : IT
+ VLAN       : VLAN 20
+ Fa0/1      -> Router1 GigabitEthernet0/2 (trunk uplink)
+ Fa0/2      -> IT-PC1  (access, VLAN 20)
+ Fa0/3      -> IT-PC2  (access, VLAN 20)
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -345,28 +413,26 @@ configure terminal
 ! --- Set hostname ---
 hostname Switch2
 
-! --- Create VLAN 20 for IT department ---
+! --- Create VLAN 20 ---
 vlan 20
  name IT
  exit
 
-! --- Configure access port for IT-PC1 ---
+! --- Trunk port (uplink to Router1 GigabitEthernet0/2) ---
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! --- Access port for IT-PC1 ---
 interface FastEthernet0/2
  switchport mode access
  switchport access vlan 20
  exit
 
-! --- Configure access port for IT-PC2 ---
+! --- Access port for IT-PC2 ---
 interface FastEthernet0/3
  switchport mode access
  switchport access vlan 20
- exit
-
-! --- Configure trunk port to Router1 (uplink) ---
-interface FastEthernet0/1
- switchport mode trunk
- switchport trunk native vlan 1
- switchport trunk allowed vlan all
  exit
 
 ! --- Save configuration ---
@@ -376,11 +442,12 @@ write memory
 
 ================================================================
  SWITCH 3 CONFIGURATION
- Department: Finance
- VLANs: VLAN 30 (Finance)
- Fa0/1 -> Router2      (trunk uplink)
- Fa0/2 -> Finance-PC1  (access, VLAN 30)
- Fa0/3 -> Finance-PC2  (access, VLAN 30)
+ Model      : Cisco 2960
+ Department : Finance
+ VLAN       : VLAN 30
+ Fa0/1      -> Router2 GigabitEthernet0/0 (trunk uplink)
+ Fa0/2      -> Finance-PC1 (access, VLAN 30)
+ Fa0/3      -> Finance-PC2 (access, VLAN 30)
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -392,28 +459,26 @@ configure terminal
 ! --- Set hostname ---
 hostname Switch3
 
-! --- Create VLAN 30 for Finance department ---
+! --- Create VLAN 30 ---
 vlan 30
  name Finance
  exit
 
-! --- Configure access port for Finance-PC1 ---
+! --- Trunk port (uplink to Router2 GigabitEthernet0/0) ---
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! --- Access port for Finance-PC1 ---
 interface FastEthernet0/2
  switchport mode access
  switchport access vlan 30
  exit
 
-! --- Configure access port for Finance-PC2 ---
+! --- Access port for Finance-PC2 ---
 interface FastEthernet0/3
  switchport mode access
  switchport access vlan 30
- exit
-
-! --- Configure trunk port to Router2 (uplink) ---
-interface FastEthernet0/1
- switchport mode trunk
- switchport trunk native vlan 1
- switchport trunk allowed vlan all
  exit
 
 ! --- Save configuration ---
@@ -423,11 +488,12 @@ write memory
 
 ================================================================
  SWITCH 4 CONFIGURATION
- Department: Sales
- VLANs: VLAN 40 (Sales)
- Fa0/1 -> Router2    (trunk uplink)
- Fa0/2 -> Sales-PC1  (access, VLAN 40)
- Fa0/3 -> Sales-PC2  (access, VLAN 40)
+ Model      : Cisco 2960
+ Department : Sales
+ VLAN       : VLAN 40
+ Fa0/1      -> Router2 GigabitEthernet0/2 (trunk uplink)
+ Fa0/2      -> Sales-PC1 (access, VLAN 40)
+ Fa0/3      -> Sales-PC2 (access, VLAN 40)
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -439,28 +505,26 @@ configure terminal
 ! --- Set hostname ---
 hostname Switch4
 
-! --- Create VLAN 40 for Sales department ---
+! --- Create VLAN 40 ---
 vlan 40
  name Sales
  exit
 
-! --- Configure access port for Sales-PC1 ---
+! --- Trunk port (uplink to Router2 GigabitEthernet0/2) ---
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! --- Access port for Sales-PC1 ---
 interface FastEthernet0/2
  switchport mode access
  switchport access vlan 40
  exit
 
-! --- Configure access port for Sales-PC2 ---
+! --- Access port for Sales-PC2 ---
 interface FastEthernet0/3
  switchport mode access
  switchport access vlan 40
- exit
-
-! --- Configure trunk port to Router2 (uplink) ---
-interface FastEthernet0/1
- switchport mode trunk
- switchport trunk native vlan 1
- switchport trunk allowed vlan all
  exit
 
 ! --- Save configuration ---
@@ -470,13 +534,14 @@ write memory
 
 ================================================================
  SWITCH 5 CONFIGURATION
- Department: Server Room
- VLANs: VLAN 50 (Servers)
- Fa0/1 -> Router5      (trunk uplink)
- Fa0/2 -> DHCP-Server  (access, VLAN 50) [192.168.50.10]
- Fa0/3 -> DNS-Server   (access, VLAN 50) [192.168.50.20]
- Fa0/4 -> Web-Server   (access, VLAN 50) [192.168.50.30]
- Fa0/5 -> Mail-Server  (access, VLAN 50) [192.168.50.40]
+ Model      : Cisco 2960
+ Department : Server Room
+ VLAN       : VLAN 50
+ Fa0/1      -> Router5 GigabitEthernet0/2 (trunk uplink)
+ Fa0/2      -> DHCP-Server (access, VLAN 50)
+ Fa0/3      -> DNS-Server  (access, VLAN 50)
+ Fa0/4      -> Web-Server  (access, VLAN 50)
+ Fa0/5      -> Mail-Server (access, VLAN 50)
 ================================================================
 
 ! --- Enter privileged mode ---
@@ -488,40 +553,38 @@ configure terminal
 ! --- Set hostname ---
 hostname Switch5
 
-! --- Create VLAN 50 for Server Room ---
+! --- Create VLAN 50 ---
 vlan 50
  name Servers
  exit
 
-! --- Configure access port for DHCP Server ---
+! --- Trunk port (uplink to Router5 GigabitEthernet0/2) ---
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! --- Access port for DHCP-Server ---
 interface FastEthernet0/2
  switchport mode access
  switchport access vlan 50
  exit
 
-! --- Configure access port for DNS Server ---
+! --- Access port for DNS-Server ---
 interface FastEthernet0/3
  switchport mode access
  switchport access vlan 50
  exit
 
-! --- Configure access port for Web Server ---
+! --- Access port for Web-Server ---
 interface FastEthernet0/4
  switchport mode access
  switchport access vlan 50
  exit
 
-! --- Configure access port for Mail Server ---
+! --- Access port for Mail-Server ---
 interface FastEthernet0/5
  switchport mode access
  switchport access vlan 50
- exit
-
-! --- Configure trunk port to Router5 (uplink) ---
-interface FastEthernet0/1
- switchport mode trunk
- switchport trunk native vlan 1
- switchport trunk allowed vlan all
  exit
 
 ! --- Save configuration ---
@@ -530,307 +593,105 @@ write memory
 
 
 ================================================================
- SERVER CONFIGURATION (GUI — Packet Tracer Desktop/Services)
- NOTE: Servers are configured via the Packet Tracer GUI,
-       not via CLI. These are the step-by-step GUI settings.
-================================================================
-
-----------------------------------------------------------------
- DHCP SERVER  —  IP: 192.168.50.10
-----------------------------------------------------------------
- Desktop > IP Configuration:
-   IP Address    : 192.168.50.10
-   Subnet Mask   : 255.255.255.0
-   Default Gateway: 192.168.50.1
-   DNS Server    : 192.168.50.20
-
- Services > DHCP:
-   Service: ON
-
-   Pool 1 — HR
-     Pool Name        : HR-POOL
-     Default Gateway  : 192.168.10.1
-     DNS Server       : 192.168.50.20
-     Start IP Address : 192.168.10.100
-     Subnet Mask      : 255.255.255.0
-     Max Users        : 100
-     [Click ADD]
-
-   Pool 2 — IT
-     Pool Name        : IT-POOL
-     Default Gateway  : 192.168.20.1
-     DNS Server       : 192.168.50.20
-     Start IP Address : 192.168.20.100
-     Subnet Mask      : 255.255.255.0
-     Max Users        : 100
-     [Click ADD]
-
-   Pool 3 — Finance
-     Pool Name        : FINANCE-POOL
-     Default Gateway  : 192.168.30.1
-     DNS Server       : 192.168.50.20
-     Start IP Address : 192.168.30.100
-     Subnet Mask      : 255.255.255.0
-     Max Users        : 100
-     [Click ADD]
-
-   Pool 4 — Sales
-     Pool Name        : SALES-POOL
-     Default Gateway  : 192.168.40.1
-     DNS Server       : 192.168.50.20
-     Start IP Address : 192.168.40.100
-     Subnet Mask      : 255.255.255.0
-     Max Users        : 100
-     [Click ADD]
-
-----------------------------------------------------------------
- DNS SERVER  —  IP: 192.168.50.20
-----------------------------------------------------------------
- Desktop > IP Configuration:
-   IP Address    : 192.168.50.20
-   Subnet Mask   : 255.255.255.0
-   Default Gateway: 192.168.50.1
-
- Services > DNS:
-   Service: ON
-
-   Record 1:
-     Name    : www.company.com
-     Type    : A Record
-     Address : 192.168.50.30
-     [Click ADD]
-
-   Record 2:
-     Name    : mail.company.com
-     Type    : A Record
-     Address : 192.168.50.40
-     [Click ADD]
-
-   Record 3:
-     Name    : dhcp.company.com
-     Type    : A Record
-     Address : 192.168.50.10
-     [Click ADD]
-
-   Record 4:
-     Name    : dns.company.com
-     Type    : A Record
-     Address : 192.168.50.20
-     [Click ADD]
-
-----------------------------------------------------------------
- WEB SERVER  —  IP: 192.168.50.30
-----------------------------------------------------------------
- Desktop > IP Configuration:
-   IP Address    : 192.168.50.30
-   Subnet Mask   : 255.255.255.0
-   Default Gateway: 192.168.50.1
-   DNS Server    : 192.168.50.20
-
- Services > HTTP:
-   HTTP Service  : ON
-   HTTPS Service : ON
-
-   Edit index.html — paste the following content:
-
-   <html>
-   <head><title>Company Website</title></head>
-   <body>
-   <h1>Welcome to Company.com</h1>
-   <p>This is the official company website.</p>
-   <p>Departments: HR, IT, Finance, Sales</p>
-   </body>
-   </html>
-
-   [Click SAVE]
-
-----------------------------------------------------------------
- MAIL SERVER  —  IP: 192.168.50.40
-----------------------------------------------------------------
- Desktop > IP Configuration:
-   IP Address    : 192.168.50.40
-   Subnet Mask   : 255.255.255.0
-   Default Gateway: 192.168.50.1
-   DNS Server    : 192.168.50.20
-
- Services > EMAIL:
-   Service: ON
-   Domain Name: company.com
-   [Click SET]
-
-   User 1:
-     User     : hr.user
-     Password : Pass123
-     [Click + to add]
-
-   User 2:
-     User     : it.user
-     Password : Pass123
-     [Click + to add]
-
-   User 3:
-     User     : finance.user
-     Password : Pass123
-     [Click + to add]
-
-   User 4:
-     User     : sales.user
-     Password : Pass123
-     [Click + to add]
-
-
-================================================================
- PC CONFIGURATION
- Each PC uses DHCP. Set each PC to DHCP mode.
- Also configure the Email client on each PC.
-================================================================
-
-----------------------------------------------------------------
- ALL PCs — Set to DHCP
-----------------------------------------------------------------
- Desktop > IP Configuration:
-   Select: DHCP
-   (Wait for IP address to be assigned automatically)
-
-----------------------------------------------------------------
- HR-PC1 — Email Client Setup
-----------------------------------------------------------------
- Desktop > Email > Configure Mail:
-   Your Name            : HR User
-   Email Address        : hr.user@company.com
-   Incoming Mail Server : 192.168.50.40
-   Outgoing Mail Server : 192.168.50.40
-   Username             : hr.user
-   Password             : Pass123
-   [Click SAVE]
-
-----------------------------------------------------------------
- IT-PC1 — Email Client Setup
-----------------------------------------------------------------
- Desktop > Email > Configure Mail:
-   Your Name            : IT User
-   Email Address        : it.user@company.com
-   Incoming Mail Server : 192.168.50.40
-   Outgoing Mail Server : 192.168.50.40
-   Username             : it.user
-   Password             : Pass123
-   [Click SAVE]
-
-----------------------------------------------------------------
- Finance-PC1 — Email Client Setup
-----------------------------------------------------------------
- Desktop > Email > Configure Mail:
-   Your Name            : Finance User
-   Email Address        : finance.user@company.com
-   Incoming Mail Server : 192.168.50.40
-   Outgoing Mail Server : 192.168.50.40
-   Username             : finance.user
-   Password             : Pass123
-   [Click SAVE]
-
-----------------------------------------------------------------
- Sales-PC1 — Email Client Setup
-----------------------------------------------------------------
- Desktop > Email > Configure Mail:
-   Your Name            : Sales User
-   Email Address        : sales.user@company.com
-   Incoming Mail Server : 192.168.50.40
-   Outgoing Mail Server : 192.168.50.40
-   Username             : sales.user
-   Password             : Pass123
-   [Click SAVE]
-
-
-================================================================
  VERIFICATION COMMANDS
- Run these on routers and switches to check configuration.
+ Run these on each device to check the configuration
 ================================================================
 
-----------------------------------------------------------------
- On ANY Router — Verify IP interfaces
-----------------------------------------------------------------
+! --- Check all interfaces (run on any router) ---
 show ip interface brief
 
-----------------------------------------------------------------
- On ANY Router — Verify RIP routing table
-----------------------------------------------------------------
+! --- Check routing table (run on any router) ---
 show ip route
+
+! --- Check RIP neighbors (run on any router) ---
 show ip rip database
 
-----------------------------------------------------------------
- On Router1 — Verify sub-interfaces
-----------------------------------------------------------------
-show interfaces FastEthernet0/0.10
-show interfaces FastEthernet0/0.20
-
-----------------------------------------------------------------
- On ANY Switch — Verify VLANs
-----------------------------------------------------------------
+! --- Check VLANs on a switch ---
 show vlan brief
 
-----------------------------------------------------------------
- On ANY Switch — Verify trunk ports
-----------------------------------------------------------------
+! --- Check trunk ports on a switch ---
 show interfaces trunk
 
-----------------------------------------------------------------
- On ANY Switch — Verify port status
-----------------------------------------------------------------
-show interfaces status
-
-----------------------------------------------------------------
- From ANY PC — Ping tests (run in Desktop > Command Prompt)
-----------------------------------------------------------------
-
-! Ping own gateway (HR PC example)
+! --- Ping test (run from router CLI) ---
 ping 192.168.10.1
+ping 192.168.20.1
+ping 192.168.30.1
+ping 192.168.40.1
+ping 192.168.50.1
 
-! Ping across VLANs: HR to IT
-ping 192.168.20.100
-
-! Ping across VLANs: HR to Finance
-ping 192.168.30.100
-
-! Ping across VLANs: HR to Sales
-ping 192.168.40.100
-
-! Ping Web Server
-ping 192.168.50.30
-
-! Ping DNS Server
-ping 192.168.50.20
-
-! Ping DHCP Server
+! --- Ping the DHCP server from a router ---
 ping 192.168.50.10
 
-! Ping Mail Server
-ping 192.168.50.40
 
-! DNS resolution test (use web browser and type domain name)
-! Open Desktop > Web Browser > http://www.company.com
+================================================================
+ DHCP SERVER SETTINGS (configure in GUI — Services > DHCP)
+================================================================
 
-----------------------------------------------------------------
- From ANY Router — Debug RIP (optional, for troubleshooting)
-----------------------------------------------------------------
-debug ip rip
-! (Press Ctrl+Shift+6 then X to stop debug)
-no debug all
+Pool: HR-Pool
+  Default Gateway : 192.168.10.1
+  DNS Server      : 192.168.50.20
+  Start IP Address: 192.168.10.100
+  Subnet Mask     : 255.255.255.0
+  Max Users       : 101
 
-----------------------------------------------------------------
- Useful show commands summary
-----------------------------------------------------------------
-show running-config
-show startup-config
-show ip route
-show ip interface brief
-show vlan brief
-show interfaces trunk
-show interfaces status
-show ip rip database
-show ip protocols
-show version
+Pool: IT-Pool
+  Default Gateway : 192.168.20.1
+  DNS Server      : 192.168.50.20
+  Start IP Address: 192.168.20.100
+  Subnet Mask     : 255.255.255.0
+  Max Users       : 101
+
+Pool: Finance-Pool
+  Default Gateway : 192.168.30.1
+  DNS Server      : 192.168.50.20
+  Start IP Address: 192.168.30.100
+  Subnet Mask     : 255.255.255.0
+  Max Users       : 101
+
+Pool: Sales-Pool
+  Default Gateway : 192.168.40.1
+  DNS Server      : 192.168.50.20
+  Start IP Address: 192.168.40.100
+  Subnet Mask     : 255.255.255.0
+  Max Users       : 101
 
 
 ================================================================
- END OF COMMAND FILE
+ SERVER STATIC IP ADDRESSES (configure in GUI — Desktop > IP)
+================================================================
+
+DHCP-Server:
+  IP Address  : 192.168.50.10
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.50.1
+  DNS         : 192.168.50.20
+
+DNS-Server:
+  IP Address  : 192.168.50.20
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.50.1
+
+Web-Server:
+  IP Address  : 192.168.50.30
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.50.1
+  DNS         : 192.168.50.20
+
+Mail-Server:
+  IP Address  : 192.168.50.40
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.50.1
+  DNS         : 192.168.50.20
+
+
+================================================================
+ DNS RECORDS (configure in GUI — DNS-Server > Services > DNS)
+================================================================
+
+  www.company.com   A   192.168.50.30
+  mail.company.com  A   192.168.50.40
+
+
+================================================================
+ END OF FILE
 ================================================================
