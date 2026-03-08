@@ -4,7 +4,7 @@
 
 This document explains how to build a company network using Cisco Packet Tracer.
 The network has 5 routers, 5 switches, 4 servers, and 8 PCs.
-It uses VLANs, RIP routing, DHCP, DNS, Web, and Mail services.
+It uses VLANs, RIP routing (with one router using Static Routing), DHCP, DNS, Web, and Mail services.
 
 The routers are **Cisco 2911**. The switches are **Cisco 2960**.
 Follow each step carefully. You will be able to finish the whole project using only this guide.
@@ -28,6 +28,7 @@ Follow each step carefully. You will be able to finish the whole project using o
 10. [Mail Server Configuration](#10-mail-server-configuration)
 11. [PC Configuration](#11-pc-configuration)
 12. [Testing and Verification](#12-testing-and-verification)
+13. [Bonus: Convert Router3 to Static Routing](#13-bonus-convert-router3-to-static-routing)
 
 ---
 
@@ -219,7 +220,7 @@ All departments can reach the servers through the routers.
 
 | Device      | Model      | Count | Purpose                          |
 |-------------|------------|-------|----------------------------------|
-| Routers     | Cisco 2911 | 5     | Connect networks, RIP routing    |
+| Routers     | Cisco 2911 | 5     | Connect networks, RIP + Static routing |
 | Switches    | Cisco 2960 | 5     | Connect PCs within departments   |
 | Servers     | Server-PT  | 4     | DHCP, DNS, Web, Mail             |
 | PCs         | PC-PT      | 8     | End user devices (2 per dept)    |
@@ -1202,6 +1203,128 @@ You should get a reply.
 | Trunk port not working               | Check `switchport mode trunk` on the switch uplink port         |
 | Sub-interface not working            | Check `encapsulation dot1Q <vlan-id>` on the router sub-interface |
 | Web page not loading                 | Check DNS and HTTP service on servers                           |
+
+---
+
+## 13. Bonus: Convert Router3 to Static Routing
+
+### What is Static Routing?
+
+Static routing means you manually tell the router the path to each network.
+The router does not learn routes automatically from other routers.
+You type each route yourself using the `ip route` command.
+
+Static routing is good when:
+- The network is small
+- You want full control over the routing path
+- You want to learn how routing works step by step
+
+### Why Router3?
+
+Router3 is the simplest router in this network.
+It has only 2 connections:
+- **Left side:** GigabitEthernet0/0 → Router1 (next-hop: `10.0.0.1`)
+- **Right side:** GigabitEthernet0/1 → Router5 (next-hop: `10.0.2.2`)
+
+It has no VLANs and no sub-interfaces.
+Every packet either goes left (toward Router1) or right (toward Router5).
+This makes static routes simple and clear.
+
+### Static Route Table for Router3
+
+| # | Destination Network | Subnet Mask       | Next-Hop IP | Direction | Explanation                     |
+|---|--------------------|--------------------|-------------|-----------|----------------------------------|
+| 1 | 192.168.10.0       | 255.255.255.0     | 10.0.0.1    | ← Left   | HR VLAN — via Router1           |
+| 2 | 192.168.20.0       | 255.255.255.0     | 10.0.0.1    | ← Left   | IT VLAN — via Router1           |
+| 3 | 192.168.30.0       | 255.255.255.0     | 10.0.2.2    | → Right  | Finance VLAN — via Router5      |
+| 4 | 192.168.40.0       | 255.255.255.0     | 10.0.2.2    | → Right  | Sales VLAN — via Router5        |
+| 5 | 192.168.50.0       | 255.255.255.0     | 10.0.2.2    | → Right  | Server Room VLAN — via Router5  |
+| 6 | 10.0.1.0           | 255.255.255.252   | 10.0.2.2    | → Right  | R2↔R4 WAN link — via Router5   |
+| 7 | 10.0.3.0           | 255.255.255.252   | 10.0.2.2    | → Right  | R4↔R5 WAN link — via Router5   |
+
+### Step-by-Step Instructions
+
+**Step 1:** Open the CLI.
+
+Click on Router3 → click the **CLI** tab → press Enter.
+
+**Step 2:** Enter configuration mode.
+
+```
+Router3> enable
+Router3# configure terminal
+```
+
+**Step 3:** Remove RIP from Router3.
+
+```
+Router3(config)# no router rip
+```
+
+> This command removes all RIP configuration from Router3. After this, Router3 has no routing protocol. It only knows about its directly connected networks.
+
+**Step 4:** Add all 7 static routes.
+
+```
+! Route to HR VLAN (via Router1)
+Router3(config)# ip route 192.168.10.0 255.255.255.0 10.0.0.1
+
+! Route to IT VLAN (via Router1)
+Router3(config)# ip route 192.168.20.0 255.255.255.0 10.0.0.1
+
+! Route to Finance VLAN (via Router5)
+Router3(config)# ip route 192.168.30.0 255.255.255.0 10.0.2.2
+
+! Route to Sales VLAN (via Router5)
+Router3(config)# ip route 192.168.40.0 255.255.255.0 10.0.2.2
+
+! Route to Server Room VLAN (via Router5)
+Router3(config)# ip route 192.168.50.0 255.255.255.0 10.0.2.2
+
+! Route to R2-R4 WAN link (via Router5)
+Router3(config)# ip route 10.0.1.0 255.255.255.252 10.0.2.2
+
+! Route to R4-R5 WAN link (via Router5)
+Router3(config)# ip route 10.0.3.0 255.255.255.252 10.0.2.2
+```
+
+**Step 5:** Save the configuration.
+
+```
+Router3(config)# end
+Router3# write memory
+```
+
+**Step 6:** Verify the routing table.
+
+```
+Router3# show ip route
+```
+
+You should see:
+- Routes with the letter **S** — these are static routes (the ones you just added)
+- Routes with the letter **C** — these are directly connected networks (`10.0.0.0/30` and `10.0.2.0/30`)
+- You should NOT see any routes with the letter **R** (RIP routes are gone)
+
+### Important Notes
+
+> **Do NOT change Router1, Router2, Router4, or Router5.** They all keep using RIP. No changes needed.
+>
+> Router3's directly connected networks (`10.0.0.0/30` and `10.0.2.0/30`) are already advertised by Router1 and Router5 in their RIP configurations. So the rest of the network already knows how to reach Router3.
+
+### Verification
+
+1. Open **HR-PC1** → Desktop → Command Prompt.
+2. Type: `ping 192.168.30.100` (Finance PC).
+3. You should get a reply. This means the static routes on Router3 are working correctly.
+4. Also try: `ping 192.168.50.10` (DHCP Server).
+5. You should get a reply.
+
+If the ping fails, check:
+- Did you type `no router rip` on Router3?
+- Did you add all 7 static routes?
+- Did you save with `write memory`?
+- Run `show ip route` on Router3 to check.
 
 ---
 
