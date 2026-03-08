@@ -757,5 +757,76 @@ show ip route
 
 
 ================================================================
+ SECTION 14 — ADD DEFAULT ROUTE ON ROUTER4
+ (Run these commands on Router4 to replace RIP with
+  static routes + a default route)
+================================================================
+
+! --- Enter privileged mode ---
+enable
+
+! --- Enter global configuration mode ---
+configure terminal
+
+! --- Remove RIP from Router4 ---
+no router rip
+
+! --- Static routes for Router2's LANs (via Router2) ---
+ip route 192.168.30.0 255.255.255.0 10.0.1.1
+ip route 192.168.40.0 255.255.255.0 10.0.1.1
+
+! --- Default route for everything else (via Router5) ---
+ip route 0.0.0.0 0.0.0.0 10.0.3.2
+
+! --- Save configuration ---
+end
+write memory
+
+! --- Verify: check routing table ---
+show ip route
+
+! You should see:
+!   S* 0.0.0.0/0 [1/0] via 10.0.3.2  (default route)
+!   S  192.168.30.0/24 [1/0] via 10.0.1.1
+!   S  192.168.40.0/24 [1/0] via 10.0.1.1
+!   C  10.0.1.0/30 and 10.0.3.0/30 (connected)
+
+! NOTE: No changes needed on Router1, Router2, Router3, or Router5.
+
+
+================================================================
+ SECTION 15 — PRESENTATION DEMO COMMANDS
+ (Quick reference: commands to run during your live demo)
+================================================================
+
+! --- On Switch1 (show VLANs) ---
+show vlan brief
+show interfaces trunk
+
+! --- On Router1 (show routing and sub-interfaces) ---
+show ip interface brief
+show ip route
+show running-config | section interface
+
+! --- On Router3 (show static routes — if Section 13 was done) ---
+show ip route
+
+! --- On Router4 (show default route — if Section 14 was done) ---
+show ip route
+
+! --- On any PC (test connectivity) ---
+! Desktop > Command Prompt:
+ping 192.168.10.1
+ping 192.168.20.100
+ping 192.168.30.100
+ping 192.168.50.10
+ping 192.168.50.30
+nslookup www.company.com
+
+! --- On any PC (test web) ---
+! Desktop > Web Browser > http://www.company.com
+
+
+================================================================
  END OF FILE
 ================================================================
