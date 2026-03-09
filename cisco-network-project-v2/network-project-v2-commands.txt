@@ -1,0 +1,788 @@
+================================================================
+ CISCO PACKET TRACER — COMPANY NETWORK PROJECT V2
+ All CLI Commands — Ready to Copy-Paste
+ Device Models: Router = Cisco 2911 | Switch = Cisco 2960
+ Author: Mohammed Abuaisha \ mabuaisha1@smail.ucas.edu.ps
+================================================================
+
+----------------------------------------------------------------
+ NETWORK SUMMARY
+----------------------------------------------------------------
+ 4 Routers  (Cisco 2911): Router1, Router2, Router3, Router4
+ 5 Switches (Cisco 2960): Switch1 (HR+IT), Switch2 (Finance+Sales),
+                           Switch3 (Servers), Switch4 (Management),
+                           Switch5 (HR+IT cascade from Switch1)
+ 4 Servers  (Server-PT) : DHCP-Server  (192.168.50.10)
+                           DNS-Server   (192.168.50.20)
+                           Web-Server   (192.168.50.30)
+                           Mail-Server  (192.168.50.40)
+18 PCs      (PC-PT)     : HR-PC1/2/3/4/5, IT-PC1/2/3/4,
+                           Finance-PC1/2/3, Sales-PC1/2/3,
+                           Admin-PC1/2
+
+----------------------------------------------------------------
+ VLANs
+----------------------------------------------------------------
+  VLAN 10 = HR          (192.168.10.0/24, GW: 192.168.10.1)
+  VLAN 20 = IT          (192.168.20.0/24, GW: 192.168.20.1)
+  VLAN 30 = Finance     (192.168.30.0/24, GW: 192.168.30.1)
+  VLAN 40 = Sales       (192.168.40.0/24, GW: 192.168.40.1)
+  VLAN 50 = Servers     (192.168.50.0/24, GW: 192.168.50.1)
+  VLAN 60 = Management  (192.168.60.0/24, GW: 192.168.60.1)
+
+----------------------------------------------------------------
+ WAN LINKS (Point-to-Point /30 subnets)
+----------------------------------------------------------------
+  R1 <-> R3 : 10.0.0.0/30  (R1=10.0.0.1,  R3=10.0.0.2)
+  R2 <-> R3 : 10.0.1.0/30  (R2=10.0.1.1,  R3=10.0.1.2)
+  R1 <-> R2 : 10.0.3.0/30  (R1=10.0.3.1,  R2=10.0.3.2)
+  R2 <-> R4 : 10.0.2.0/30  (R2=10.0.2.1,  R4=10.0.2.2)
+
+----------------------------------------------------------------
+ INTERFACE MAP (Cisco 2911 uses GigabitEthernet)
+----------------------------------------------------------------
+  Router1 : Gig0/0 -> Switch1 (trunk VLAN 10+20)
+            Gig0/1 -> Router3 (WAN 10.0.0.0/30)
+            Gig0/2 -> Router2 (WAN 10.0.3.0/30)
+
+  Router2 : Gig0/0 -> Switch2 (trunk VLAN 30+40)
+            Gig0/1 -> Router3 (WAN 10.0.1.0/30)
+            Gig0/2 -> Router4 (WAN 10.0.2.0/30)
+
+  Router3 : Gig0/0 -> Router1 (WAN 10.0.0.0/30)
+            Gig0/1 -> Router2 (WAN 10.0.1.0/30)
+            Gig0/2 -> Switch4 (trunk VLAN 60)
+
+  Router4 : Gig0/0 -> Switch3 (trunk VLAN 50)
+            Gig0/1 -> Router2 (WAN 10.0.2.0/30)
+
+----------------------------------------------------------------
+ ROUTING PROTOCOLS
+----------------------------------------------------------------
+  Router1 : RIP v2
+  Router2 : RIP v2 + OSPF area 0 (redistribution boundary)
+  Router3 : RIP v2 + 1 static route (demonstration)
+  Router4 : OSPF area 0 + default route
+
+----------------------------------------------------------------
+ CABLE TABLE
+----------------------------------------------------------------
+  Cable 1 : Router1  Gig0/0   <-> Switch1  Fa0/1   [Straight]
+  Cable 2 : Router1  Gig0/1   <-> Router3  Gig0/0  [Crossover]
+  Cable 3 : Router1  Gig0/2   <-> Router2  Gig0/2  [Crossover]
+  Cable 4 : Router2  Gig0/0   <-> Switch2  Fa0/1   [Straight]
+  Cable 5 : Router2  Gig0/1   <-> Router3  Gig0/1  [Crossover]
+  Cable 6 : Router2  Gig0/2   <-> Router4  Gig0/1  [Crossover]
+  Cable 7 : Router3  Gig0/2   <-> Switch4  Fa0/1   [Straight]
+  Cable 8 : Router4  Gig0/0   <-> Switch3  Fa0/1   [Straight]
+  Cable 9 : Switch1  Fa0/24   <-> Switch5  Fa0/1   [Crossover]
+  Cable 10: Switch1  Fa0/2    <-> HR-PC1   Fa0     [Straight]
+  Cable 11: Switch1  Fa0/3    <-> HR-PC2   Fa0     [Straight]
+  Cable 12: Switch1  Fa0/4    <-> HR-PC3   Fa0     [Straight]
+  Cable 13: Switch1  Fa0/5    <-> IT-PC1   Fa0     [Straight]
+  Cable 14: Switch1  Fa0/6    <-> IT-PC2   Fa0     [Straight]
+  Cable 15: Switch1  Fa0/7    <-> IT-PC3   Fa0     [Straight]
+  Cable 16: Switch2  Fa0/2    <-> Finance-PC1 Fa0  [Straight]
+  Cable 17: Switch2  Fa0/3    <-> Finance-PC2 Fa0  [Straight]
+  Cable 18: Switch2  Fa0/4    <-> Finance-PC3 Fa0  [Straight]
+  Cable 19: Switch2  Fa0/5    <-> Sales-PC1 Fa0    [Straight]
+  Cable 20: Switch2  Fa0/6    <-> Sales-PC2 Fa0    [Straight]
+  Cable 21: Switch2  Fa0/7    <-> Sales-PC3 Fa0    [Straight]
+  Cable 22: Switch3  Fa0/2    <-> DHCP-Server Fa0  [Straight]
+  Cable 23: Switch3  Fa0/3    <-> DNS-Server  Fa0  [Straight]
+  Cable 24: Switch3  Fa0/4    <-> Web-Server  Fa0  [Straight]
+  Cable 25: Switch3  Fa0/5    <-> Mail-Server Fa0  [Straight]
+  Cable 26: Switch4  Fa0/2    <-> Admin-PC1   Fa0  [Straight]
+  Cable 27: Switch4  Fa0/3    <-> Admin-PC2   Fa0  [Straight]
+  Cable 28: Switch5  Fa0/2    <-> HR-PC4      Fa0  [Straight]
+  Cable 29: Switch5  Fa0/3    <-> HR-PC5      Fa0  [Straight]
+  Cable 30: Switch5  Fa0/4    <-> IT-PC4      Fa0  [Straight]
+----------------------------------------------------------------
+
+
+================================================================
+ ROUTER 1 CONFIGURATION
+ Model    : Cisco 2911
+ Role     : RIP v2 — Gateway for HR (VLAN 10) and IT (VLAN 20)
+ WAN R3   : GigabitEthernet0/1 = 10.0.0.1/30
+ WAN R2   : GigabitEthernet0/2 = 10.0.3.1/30
+ LAN HR   : GigabitEthernet0/0.10 = 192.168.10.1/24 (VLAN 10)
+ LAN IT   : GigabitEthernet0/0.20 = 192.168.20.1/24 (VLAN 20)
+================================================================
+
+enable
+configure terminal
+
+hostname Router1
+
+! WAN interface to Router3
+interface GigabitEthernet0/1
+ ip address 10.0.0.1 255.255.255.252
+ no shutdown
+ exit
+
+! WAN interface to Router2 (direct link)
+interface GigabitEthernet0/2
+ ip address 10.0.3.1 255.255.255.252
+ no shutdown
+ exit
+
+! Enable trunk LAN interface for Switch1
+interface GigabitEthernet0/0
+ no shutdown
+ exit
+
+! Sub-interface for HR VLAN 10
+interface GigabitEthernet0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+ ip helper-address 192.168.50.10
+ exit
+
+! Sub-interface for IT VLAN 20
+interface GigabitEthernet0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+ ip helper-address 192.168.50.10
+ exit
+
+! RIP v2 configuration
+router rip
+ version 2
+ no auto-summary
+ network 10.0.0.0
+ network 192.168.10.0
+ network 192.168.20.0
+ exit
+
+end
+write memory
+
+
+================================================================
+ ROUTER 2 CONFIGURATION
+ Model    : Cisco 2911
+ Role     : RIP v2 + OSPF area 0 — REDISTRIBUTION BOUNDARY
+            Gateway for Finance (VLAN 30) and Sales (VLAN 40)
+ WAN R3   : GigabitEthernet0/1 = 10.0.1.1/30
+ WAN R4   : GigabitEthernet0/2 = 10.0.2.1/30
+ LAN Fin. : GigabitEthernet0/0.30 = 192.168.30.1/24 (VLAN 30)
+ LAN Sales: GigabitEthernet0/0.40 = 192.168.40.1/24 (VLAN 40)
+================================================================
+
+enable
+configure terminal
+
+hostname Router2
+
+! WAN interface to Router3
+interface GigabitEthernet0/1
+ ip address 10.0.1.1 255.255.255.252
+ no shutdown
+ exit
+
+! WAN interface to Router4
+interface GigabitEthernet0/2
+ ip address 10.0.2.1 255.255.255.252
+ no shutdown
+ exit
+
+! Enable trunk LAN interface for Switch2
+interface GigabitEthernet0/0
+ no shutdown
+ exit
+
+! Sub-interface for Finance VLAN 30
+interface GigabitEthernet0/0.30
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.0
+ ip helper-address 192.168.50.10
+ exit
+
+! Sub-interface for Sales VLAN 40
+interface GigabitEthernet0/0.40
+ encapsulation dot1Q 40
+ ip address 192.168.40.1 255.255.255.0
+ ip helper-address 192.168.50.10
+ exit
+
+! RIP v2 configuration with OSPF redistribution
+! "redistribute ospf 1 metric 2" injects OSPF routes (VLAN 50)
+! into RIP so Router1 and Router3 learn about the Server Room.
+router rip
+ version 2
+ no auto-summary
+ network 10.0.0.0
+ network 192.168.30.0
+ network 192.168.40.0
+ redistribute ospf 1 metric 2
+ exit
+
+! OSPF configuration with RIP redistribution
+! "redistribute rip metric 20 subnets" injects RIP routes
+! (VLAN 10,20,30,40,60) into OSPF so Router4 learns them.
+! "subnets" is required to redistribute classless routes.
+router ospf 1
+ network 10.0.2.0 0.0.0.3 area 0
+ redistribute rip metric 20 subnets
+ exit
+
+end
+write memory
+
+
+================================================================
+ ROUTER 3 CONFIGURATION
+ Model    : Cisco 2911
+ Role     : RIP v2 + 1 static route — Transit + VLAN 60 gateway
+ WAN R1   : GigabitEthernet0/0 = 10.0.0.2/30
+ WAN R2   : GigabitEthernet0/1 = 10.0.1.2/30
+ LAN Mgmt : GigabitEthernet0/2.60 = 192.168.60.1/24 (VLAN 60)
+================================================================
+
+enable
+configure terminal
+
+hostname Router3
+
+! WAN interface to Router1
+interface GigabitEthernet0/0
+ ip address 10.0.0.2 255.255.255.252
+ no shutdown
+ exit
+
+! WAN interface to Router2
+interface GigabitEthernet0/1
+ ip address 10.0.1.2 255.255.255.252
+ no shutdown
+ exit
+
+! Enable trunk LAN interface for Switch4 (Management)
+interface GigabitEthernet0/2
+ no shutdown
+ exit
+
+! Sub-interface for Management VLAN 60
+interface GigabitEthernet0/2.60
+ encapsulation dot1Q 60
+ ip address 192.168.60.1 255.255.255.0
+ exit
+
+! RIP v2 configuration
+! "network 10.0.0.0" covers both WAN links (10.0.0.2 and 10.0.1.2)
+! Router3 also advertises the Management VLAN (192.168.60.0)
+router rip
+ version 2
+ no auto-summary
+ network 10.0.0.0
+ network 192.168.60.0
+ exit
+
+! Static route (demonstration)
+! This explicitly routes traffic to the R2-R4 WAN link via Router2.
+! Router3 also learns 10.0.2.0 via RIP from Router2, but the
+! static route (AD=1) takes precedence over RIP (AD=120).
+ip route 10.0.2.0 255.255.255.252 10.0.1.1
+
+end
+write memory
+
+
+================================================================
+ ROUTER 4 CONFIGURATION
+ Model    : Cisco 2911
+ Role     : OSPF area 0 + Default Route — Server Room gateway
+ WAN R2   : GigabitEthernet0/1 = 10.0.2.2/30
+ LAN Srv  : GigabitEthernet0/0.50 = 192.168.50.1/24 (VLAN 50)
+================================================================
+
+enable
+configure terminal
+
+hostname Router4
+
+! WAN interface to Router2
+interface GigabitEthernet0/1
+ ip address 10.0.2.2 255.255.255.252
+ no shutdown
+ exit
+
+! Enable trunk LAN interface for Switch3 (Server Room)
+interface GigabitEthernet0/0
+ no shutdown
+ exit
+
+! Sub-interface for Server Room VLAN 50
+interface GigabitEthernet0/0.50
+ encapsulation dot1Q 50
+ ip address 192.168.50.1 255.255.255.0
+ exit
+
+! OSPF configuration
+! Advertises the Server Room subnet and the WAN link to Router2.
+! Router2 redistributes these OSPF routes into RIP.
+router ospf 1
+ network 192.168.50.0 0.0.0.255 area 0
+ network 10.0.2.0 0.0.0.3 area 0
+ exit
+
+! Default route
+! Any traffic for networks Router4 doesn't know specifically
+! (e.g., VLAN 10, 20, 30, 40, 60) is sent to Router2 (10.0.2.1).
+! Router2 knows all routes and will forward it correctly.
+ip route 0.0.0.0 0.0.0.0 10.0.2.1
+
+end
+write memory
+
+
+================================================================
+ SWITCH 1 CONFIGURATION
+ Model      : Cisco 2960
+ Department : HR (VLAN 10) + IT (VLAN 20)  [router-on-a-stick]
+ Fa0/1      -> Router1 Gig0/0 (trunk uplink)
+ Fa0/2-4    -> HR-PC1, HR-PC2, HR-PC3 (access, VLAN 10)
+ Fa0/5-7    -> IT-PC1, IT-PC2, IT-PC3  (access, VLAN 20)
+ Fa0/24     -> Switch5 (trunk cascade)
+================================================================
+
+enable
+configure terminal
+
+hostname Switch1
+
+! Create VLAN 10
+vlan 10
+ name HR
+ exit
+
+! Create VLAN 20
+vlan 20
+ name IT
+ exit
+
+! Trunk port - uplink to Router1 Gig0/0
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! Trunk port - cascade to Switch5
+interface FastEthernet0/24
+ switchport mode trunk
+ exit
+
+! Access ports for HR (VLAN 10)
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 10
+ exit
+
+interface FastEthernet0/3
+ switchport mode access
+ switchport access vlan 10
+ exit
+
+interface FastEthernet0/4
+ switchport mode access
+ switchport access vlan 10
+ exit
+
+! Access ports for IT (VLAN 20)
+interface FastEthernet0/5
+ switchport mode access
+ switchport access vlan 20
+ exit
+
+interface FastEthernet0/6
+ switchport mode access
+ switchport access vlan 20
+ exit
+
+interface FastEthernet0/7
+ switchport mode access
+ switchport access vlan 20
+ exit
+
+end
+write memory
+
+
+================================================================
+ SWITCH 2 CONFIGURATION
+ Model      : Cisco 2960
+ Department : Finance (VLAN 30) + Sales (VLAN 40) [router-on-a-stick]
+ Fa0/1      -> Router2 Gig0/0 (trunk uplink)
+ Fa0/2-4    -> Finance-PC1, PC2, PC3 (access, VLAN 30)
+ Fa0/5-7    -> Sales-PC1, PC2, PC3   (access, VLAN 40)
+================================================================
+
+enable
+configure terminal
+
+hostname Switch2
+
+! Create VLAN 30
+vlan 30
+ name Finance
+ exit
+
+! Create VLAN 40
+vlan 40
+ name Sales
+ exit
+
+! Trunk port - uplink to Router2 Gig0/0
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! Access ports for Finance (VLAN 30)
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 30
+ exit
+
+interface FastEthernet0/3
+ switchport mode access
+ switchport access vlan 30
+ exit
+
+interface FastEthernet0/4
+ switchport mode access
+ switchport access vlan 30
+ exit
+
+! Access ports for Sales (VLAN 40)
+interface FastEthernet0/5
+ switchport mode access
+ switchport access vlan 40
+ exit
+
+interface FastEthernet0/6
+ switchport mode access
+ switchport access vlan 40
+ exit
+
+interface FastEthernet0/7
+ switchport mode access
+ switchport access vlan 40
+ exit
+
+end
+write memory
+
+
+================================================================
+ SWITCH 3 CONFIGURATION
+ Model      : Cisco 2960
+ Department : Server Room (VLAN 50)
+ Fa0/1      -> Router4 Gig0/0 (trunk uplink)
+ Fa0/2      -> DHCP-Server (access, VLAN 50)
+ Fa0/3      -> DNS-Server  (access, VLAN 50)
+ Fa0/4      -> Web-Server  (access, VLAN 50)
+ Fa0/5      -> Mail-Server (access, VLAN 50)
+================================================================
+
+enable
+configure terminal
+
+hostname Switch3
+
+! Create VLAN 50
+vlan 50
+ name Servers
+ exit
+
+! Trunk port - uplink to Router4 Gig0/0
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! Access port for DHCP-Server
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 50
+ exit
+
+! Access port for DNS-Server
+interface FastEthernet0/3
+ switchport mode access
+ switchport access vlan 50
+ exit
+
+! Access port for Web-Server
+interface FastEthernet0/4
+ switchport mode access
+ switchport access vlan 50
+ exit
+
+! Access port for Mail-Server
+interface FastEthernet0/5
+ switchport mode access
+ switchport access vlan 50
+ exit
+
+end
+write memory
+
+
+================================================================
+ SWITCH 4 CONFIGURATION
+ Model      : Cisco 2960
+ Department : Management (VLAN 60)
+ Fa0/1      -> Router3 Gig0/2 (trunk uplink)
+ Fa0/2      -> Admin-PC1 (access, VLAN 60)
+ Fa0/3      -> Admin-PC2 (access, VLAN 60)
+================================================================
+
+enable
+configure terminal
+
+hostname Switch4
+
+! Create VLAN 60
+vlan 60
+ name Management
+ exit
+
+! Trunk port - uplink to Router3 Gig0/2
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! Access port for Admin-PC1
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 60
+ exit
+
+! Access port for Admin-PC2
+interface FastEthernet0/3
+ switchport mode access
+ switchport access vlan 60
+ exit
+
+end
+write memory
+
+
+================================================================
+ SWITCH 5 CONFIGURATION
+ Model      : Cisco 2960
+ Role       : CASCADE from Switch1 — extends HR+IT departments
+ Fa0/1      -> Switch1 Fa0/24 (trunk uplink, inter-switch)
+ Fa0/2      -> HR-PC4 (access, VLAN 10)
+ Fa0/3      -> HR-PC5 (access, VLAN 10)
+ Fa0/4      -> IT-PC4  (access, VLAN 20)
+================================================================
+
+enable
+configure terminal
+
+hostname Switch5
+
+! Create VLAN 10
+vlan 10
+ name HR
+ exit
+
+! Create VLAN 20
+vlan 20
+ name IT
+ exit
+
+! Trunk port - cascade uplink to Switch1 Fa0/24
+interface FastEthernet0/1
+ switchport mode trunk
+ exit
+
+! Access ports for additional HR PCs (VLAN 10)
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 10
+ exit
+
+interface FastEthernet0/3
+ switchport mode access
+ switchport access vlan 10
+ exit
+
+! Access port for additional IT PC (VLAN 20)
+interface FastEthernet0/4
+ switchport mode access
+ switchport access vlan 20
+ exit
+
+end
+write memory
+
+
+================================================================
+ VERIFICATION COMMANDS
+ Run these on each device to check the configuration
+================================================================
+
+! --- Check all interfaces ---
+show ip interface brief
+
+! --- Check routing table ---
+show ip route
+
+! --- Check RIP (run on Router1, Router2, Router3) ---
+show ip rip database
+show ip protocols
+
+! --- Check OSPF neighbors (run on Router2 and Router4) ---
+show ip ospf neighbor
+show ip ospf database
+
+! --- Check VLANs on a switch ---
+show vlan brief
+
+! --- Check trunk ports on a switch ---
+show interfaces trunk
+
+! --- Router1: ping tests ---
+ping 10.0.0.2
+ping 10.0.3.2
+ping 192.168.30.1
+ping 192.168.50.1
+ping 192.168.60.1
+
+! --- Router4: ping tests ---
+ping 10.0.2.1
+ping 192.168.10.1
+ping 192.168.60.1
+
+! --- Ping the DHCP server from a router ---
+ping 192.168.50.10
+
+! --- Traceroute (trace routing path) ---
+traceroute 192.168.50.1
+
+
+================================================================
+ DHCP SERVER SETTINGS
+ Configure in GUI: click DHCP-Server > Services > DHCP
+================================================================
+
+Pool: HR-Pool
+  Default Gateway : 192.168.10.1
+  DNS Server      : 192.168.50.20
+  Start IP Address: 192.168.10.100
+  Subnet Mask     : 255.255.255.0
+  Max Users       : 101
+
+Pool: IT-Pool
+  Default Gateway : 192.168.20.1
+  DNS Server      : 192.168.50.20
+  Start IP Address: 192.168.20.100
+  Subnet Mask     : 255.255.255.0
+  Max Users       : 101
+
+Pool: Finance-Pool
+  Default Gateway : 192.168.30.1
+  DNS Server      : 192.168.50.20
+  Start IP Address: 192.168.30.100
+  Subnet Mask     : 255.255.255.0
+  Max Users       : 101
+
+Pool: Sales-Pool
+  Default Gateway : 192.168.40.1
+  DNS Server      : 192.168.50.20
+  Start IP Address: 192.168.40.100
+  Subnet Mask     : 255.255.255.0
+  Max Users       : 101
+
+
+================================================================
+ SERVER STATIC IP ADDRESSES
+ Configure in GUI: click server > Desktop > IP Configuration
+================================================================
+
+DHCP-Server:
+  IP Address  : 192.168.50.10
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.50.1
+  DNS         : 192.168.50.20
+
+DNS-Server:
+  IP Address  : 192.168.50.20
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.50.1
+
+Web-Server:
+  IP Address  : 192.168.50.30
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.50.1
+  DNS         : 192.168.50.20
+
+Mail-Server:
+  IP Address  : 192.168.50.40
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.50.1
+  DNS         : 192.168.50.20
+
+
+================================================================
+ ADMIN PC STATIC IP ADDRESSES
+ Configure in GUI: click PC > Desktop > IP Configuration
+================================================================
+
+Admin-PC1:
+  IP Address  : 192.168.60.10
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.60.1
+  DNS         : 192.168.50.20
+
+Admin-PC2:
+  IP Address  : 192.168.60.20
+  Subnet Mask : 255.255.255.0
+  Gateway     : 192.168.60.1
+  DNS         : 192.168.50.20
+
+
+================================================================
+ DNS SERVER SETTINGS
+ Configure in GUI: click DNS-Server > Services > DNS
+================================================================
+
+  www.company.local   -> A Record -> 192.168.50.30
+  mail.company.local  -> A Record -> 192.168.50.40
+  dhcp.company.local  -> A Record -> 192.168.50.10
+  dns.company.local   -> A Record -> 192.168.50.20
+
+
+================================================================
+ QUICK TROUBLESHOOTING
+================================================================
+
+Problem: PC gets no DHCP IP
+  Check: ip helper-address on router sub-interface
+  Check: DHCP pool configured on DHCP-Server
+  Fix:   interface GigabitEthernet0/0.10
+           ip helper-address 192.168.50.10
+
+Problem: Ping between VLANs fails
+  Check: show ip route on router
+  Check: show ip interface brief (interfaces should be up/up)
+  Check: VLAN created on switch (show vlan brief)
+
+Problem: OSPF neighbor not forming (Router2 & Router4)
+  Check: show ip ospf neighbor
+  Check: both routers use area 0
+  Check: no ACL blocking the OSPF multicast 224.0.0.5
+
+Problem: Redistribution not working
+  Check: show ip protocols on Router2
+  Check: "redistribute ospf 1 metric 2" in RIP section
+  Check: "redistribute rip metric 20 subnets" in OSPF section
+         (the "subnets" keyword is required!)
+
+Problem: Switch5 PCs get wrong VLAN
+  Check: show interfaces trunk on Switch1 and Switch5
+  Check: Fa0/24 on Switch1 is trunk
+  Check: Fa0/1 on Switch5 is trunk
+  Check: VLANs 10 and 20 are created on Switch5
+
+================================================================
