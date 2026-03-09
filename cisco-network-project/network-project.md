@@ -29,8 +29,9 @@ Follow each step carefully. You will be able to finish the whole project using o
 11. [PC Configuration](#11-pc-configuration)
 12. [Testing and Verification](#12-testing-and-verification)
 13. [Bonus: Convert Router3 to Static Routing](#13-bonus-convert-router3-to-static-routing)
-14. [Bonus: Add a Default Route on Router4](#14-bonus-add-a-default-route-on-router4)
-15. [Live Presentation & Demo Guide](#15-live-presentation--demo-guide)
+14. [Fixing the Routing — RIP + Static + Default](#14-fixing-the-routing--rip--static--default)
+15. [Bonus: Add a Default Route on Router4](#15-bonus-add-a-default-route-on-router4)
+16. [Live Presentation & Demo Guide](#16-live-presentation--demo-guide)
 
 ---
 
@@ -1330,7 +1331,327 @@ If the ping fails, check:
 
 ---
 
-## 14. Bonus: Add a Default Route on Router4
+## 14. Fixing the Routing — RIP + Static + Default
+
+### What went wrong?
+
+When you open the project, PCs in all departments show:
+> **DHCP failed. APIPA is being used.**
+
+**APIPA** stands for **Automatic Private IP Addressing**. It means the PC tried to get an IP address from a DHCP server, failed, and assigned itself a random address in the `169.254.x.x` range. This address is useless for communicating with other devices.
+
+**Why did DHCP fail?**
+
+- HR-PC1 sends a DHCP request → Router1 catches it and tries to forward it to the DHCP Server at `192.168.50.10` (using `ip helper-address`)
+- But Router1 has **no route** to `192.168.50.0/24` — RIP was accidentally removed from Router1
+- Router1 drops the packet → DHCP request never reaches the server → **DHCP failed**
+
+The same problem affects IT, Finance, and Sales PCs.
+
+**Root causes:**
+1. **RIP was removed from Router1** — Router1 cannot reach the rest of the network
+2. **RIP was removed from Router5** — Router5 cannot share routes with Router1's side
+3. **Router4 has unnecessary static routes** — these conflict with the RIP design and should be removed
+
+---
+
+### Three Types of Routing Used in This Project
+
+Before fixing anything, here is a quick explanation of the three routing types used:
+
+#### Dynamic Routing (RIP)
+Routers automatically share information about which networks they know.
+You tell each router which networks it is directly connected to, and it learns the rest automatically by talking to its neighbors.
+- Command: `router rip` → `network <address>`
+- Used on: **Router1, Router2, Router4, Router5**
+
+#### Static Routing
+You manually type a route for each remote network.
+The router never changes these routes on its own.
+- Command: `ip route <network> <mask> <next-hop>`
+- Used on: **Router3** (7 static routes — see Section 13), **Router5** (3 extra static routes for Router1's side networks)
+
+#### Default Routing
+A single "catch-all" route. If the router does not know where to send a packet, it sends it to one default address.
+- Command: `ip route 0.0.0.0 0.0.0.0 <next-hop>`
+- Used on: **Router1** (default → Router3) and **Router4** (default → Router5)
+
+---
+
+### Summary: Which Router Uses Which Routing
+
+| Router | Routing Type | Status |
+|--------|-------------|--------|
+| Router1 | Dynamic (RIP) + Default Route | Needs fix — RIP missing |
+| Router2 | Dynamic (RIP) | Working — no changes needed |
+| Router3 | Static Routing | Working — no changes needed (Section 13) |
+| Router4 | RIP + Default Route | Needs cleanup — remove wrong static routes |
+| Router5 | Dynamic (RIP) + Static Routes | Needs fix — RIP missing |
+
+---
+
+### Fix Router1
+
+**The problem:** Router1 has no RIP configured, so it cannot reach `192.168.50.0/24` (DHCP Server). It also needs a default route to Router3, because Router3 does not run RIP and therefore will not send RIP updates to Router1.
+
+**Click on Router1 → CLI tab → press Enter**
+
+```
+Router1> enable
+Router1# configure terminal
+
+Router1(config)# router rip
+Router1(config-router)# version 2
+Router1(config-router)# no auto-summary
+Router1(config-router)# network 10.0.0.0
+Router1(config-router)# network 192.168.10.0
+Router1(config-router)# network 192.168.20.0
+Router1(config-router)# exit
+
+Router1(config)# ip route 0.0.0.0 0.0.0.0 10.0.0.2
+
+Router1(config)# end
+Router1# write memory
+```
+
+**What each command does:**
+
+| Command | Explanation |
+|---------|-------------|
+| `router rip` | Start configuring RIP routing |
+| `version 2` | Use RIP version 2 (supports subnet masks) |
+| `no auto-summary` | Do not summarize networks automatically (important for /24 subnets) |
+| `network 10.0.0.0` | Tell RIP about the link to Router3 (`10.0.0.0/30`) |
+| `network 192.168.10.0` | Tell RIP about the HR VLAN |
+| `network 192.168.20.0` | Tell RIP about the IT VLAN |
+| `ip route 0.0.0.0 0.0.0.0 10.0.0.2` | Default route: for any unknown network, send to Router3 (`10.0.0.2`) |
+| `write memory` | Save the configuration so it is not lost if the device is restarted |
+
+> **Why the default route?** Router3 uses static routing only — it does not run RIP, so it will never send RIP updates to Router1. Without the default route, Router1 would have no way to reach the server networks behind Router3. With this default route, Router1 sends any unknown traffic to Router3, which knows how to forward it everywhere.
+
+---
+
+### Fix Router5
+
+**The problem:** Router5 has no RIP configured. It cannot share routing information with Router4 and Router2. It also needs static routes for the networks behind Router1, because Router3 (which connects Router5 to Router1) does not run RIP. With `redistribute static`, Router5 will advertise those static routes into RIP so that Router2 and Router4 also learn them.
+
+**Click on Router5 → CLI tab → press Enter**
+
+```
+Router5> enable
+Router5# configure terminal
+
+Router5(config)# router rip
+Router5(config-router)# version 2
+Router5(config-router)# no auto-summary
+Router5(config-router)# network 10.0.2.0
+Router5(config-router)# network 10.0.3.0
+Router5(config-router)# network 192.168.50.0
+Router5(config-router)# redistribute static
+Router5(config-router)# exit
+
+Router5(config)# ip route 192.168.10.0 255.255.255.0 10.0.2.1
+Router5(config)# ip route 192.168.20.0 255.255.255.0 10.0.2.1
+Router5(config)# ip route 10.0.0.0 255.255.255.252 10.0.2.1
+
+Router5(config)# end
+Router5# write memory
+```
+
+**What each command does:**
+
+| Command | Explanation |
+|---------|-------------|
+| `router rip` | Start configuring RIP routing |
+| `version 2` | Use RIP version 2 |
+| `no auto-summary` | Do not auto-summarize routes |
+| `network 10.0.2.0` | Tell RIP about the link to Router3 (`10.0.2.0/30`) |
+| `network 10.0.3.0` | Tell RIP about the link to Router4 (`10.0.3.0/30`) |
+| `network 192.168.50.0` | Tell RIP about the Server VLAN (DHCP, DNS, Web, Mail servers) |
+| `redistribute static` | Advertise the manually added static routes into RIP so other routers (Router4, Router2) learn them too |
+| `ip route 192.168.10.0 ...` | Static route to HR VLAN via Router3 (`10.0.2.1`) |
+| `ip route 192.168.20.0 ...` | Static route to IT VLAN via Router3 |
+| `ip route 10.0.0.0 ...` | Static route to the Router1–Router3 link (`10.0.0.0/30`) via Router3 |
+| `write memory` | Save the configuration |
+
+> **Why static routes on Router5 for HR and IT?** Router3 does not run RIP. It connects Router1 to Router5, but it will never advertise Router1's networks via RIP. So Router5 must learn about `192.168.10.0` (HR) and `192.168.20.0` (IT) through manually configured static routes. With `redistribute static`, Router5 then shares this knowledge with Router4 and Router2 via RIP.
+
+---
+
+### Fix Router4
+
+**The problem:** Router4 has two unnecessary static routes (`192.168.30.0` and `192.168.40.0`) that were manually added. These networks are already reachable via Router2 through RIP — adding static routes for them is wrong and causes confusion. We remove them and keep only the default route.
+
+**Click on Router4 → CLI tab → press Enter**
+
+```
+Router4> enable
+Router4# configure terminal
+
+! Remove the unnecessary static routes (Router2 already advertises these via RIP)
+Router4(config)# no ip route 192.168.30.0 255.255.255.0 10.0.1.1
+Router4(config)# no ip route 192.168.40.0 255.255.255.0 10.0.1.1
+
+! The default route stays — this is our example of Default Routing
+! ip route 0.0.0.0 0.0.0.0 10.0.3.2 (already exists, do not remove)
+
+! Make sure RIP is configured
+Router4(config)# router rip
+Router4(config-router)# version 2
+Router4(config-router)# no auto-summary
+Router4(config-router)# network 10.0.1.0
+Router4(config-router)# network 10.0.3.0
+Router4(config-router)# exit
+
+Router4(config)# end
+Router4# write memory
+```
+
+**What each command does:**
+
+| Command | Explanation |
+|---------|-------------|
+| `no ip route 192.168.30.0 ...` | Remove the wrong static route to Finance VLAN — Router2 already handles this via RIP |
+| `no ip route 192.168.40.0 ...` | Remove the wrong static route to Sales VLAN — Router2 already handles this via RIP |
+| `router rip` | Configure RIP on Router4 |
+| `network 10.0.1.0` | Tell RIP about the link to Router2 |
+| `network 10.0.3.0` | Tell RIP about the link to Router5 |
+
+> **Why keep the default route?** The default route (`ip route 0.0.0.0 0.0.0.0 10.0.3.2`) is already configured on Router4. It means: "If Router4 receives a packet for a network it does not know, send it to Router5 (`10.0.3.2`)." This is like saying: if you do not know where to go, ask Router5. Router5 has routes to everything, so it will forward the packet correctly. This is our demonstration of **Default Routing** on Router4.
+
+---
+
+### Verify Router3 (No Changes Needed)
+
+Router3 was converted to static routing in Section 13. No changes are needed here.
+
+**Click on Router3 → CLI tab → press Enter**
+
+```
+Router3# show ip route
+```
+
+You should see 7 static routes (marked `S`):
+
+```
+S    10.0.0.0/30       [1/0] via ...
+S    10.0.2.0/30       [1/0] via ...
+S    192.168.10.0/24   [1/0] via ...
+S    192.168.20.0/24   [1/0] via ...
+S    192.168.30.0/24   [1/0] via ...
+S    192.168.40.0/24   [1/0] via ...
+S    192.168.50.0/24   [1/0] via ...
+```
+
+If any routes are missing, go back to Section 13 and re-add them.
+
+---
+
+### Verify Router2 (No Changes Needed)
+
+Router2 is already working correctly with RIP. No changes are needed.
+
+**Click on Router2 → CLI tab → press Enter**
+
+```
+Router2# show ip route
+```
+
+You should see `R` routes (learned via RIP) for the remote networks. As long as R routes are visible, Router2 is working correctly.
+
+---
+
+### Wait for RIP to Converge
+
+After finishing all the router fixes, **wait about 30 seconds**. RIP routers send updates every 30 seconds. After one update cycle, all routers should have complete routing tables.
+
+You can watch Router1's routing table update in real time:
+
+```
+Router1# show ip route
+```
+
+Keep pressing Enter to refresh. After 30 seconds, you should start seeing `R` routes appearing.
+
+---
+
+### Verification After Fixing
+
+#### On Router1 — check routing table
+```
+Router1# show ip route
+```
+You should now see `R` routes for:
+- `192.168.30.0/24` — Finance VLAN (via Router3 → Router2)
+- `192.168.40.0/24` — Sales VLAN
+- `192.168.50.0/24` — Server VLAN (DHCP, DNS, Web, Mail)
+- `10.0.1.0/30` — link between Router2 and Router4
+- `10.0.2.0/30` — link between Router3 and Router5
+- `10.0.3.0/30` — link between Router4 and Router5
+
+#### On Router5 — check routing table
+```
+Router5# show ip route
+```
+You should now see `R` routes (or `S` static routes redistributed) for:
+- `192.168.10.0/24` — HR VLAN
+- `192.168.20.0/24` — IT VLAN
+- `10.0.0.0/30` — link between Router1 and Router3
+
+---
+
+### Test DHCP and Connectivity
+
+After verifying the routing tables:
+
+**1. Test DHCP on HR-PC1:**
+- Click on HR-PC1 → Desktop tab → IP Configuration
+- Set to **Static** → click **DHCP**
+- Wait a few seconds
+- HR-PC1 should receive an IP address in the `192.168.10.100`–`192.168.10.200` range
+- The message "DHCP failed. APIPA is being used." should be gone
+
+**2. Test pings from HR-PC1 (Desktop → Command Prompt):**
+
+```
+ping 192.168.50.10
+```
+> Expected: Success — DHCP server is reachable.
+
+```
+ping 192.168.30.100
+```
+> Expected: Success — Finance PC is reachable.
+
+**3. Test ping from Sales-PC1:**
+
+```
+ping 192.168.10.100
+```
+> Expected: Success — HR PC is reachable from Sales.
+
+**4. Test web browsing:**
+- Click on any PC → Desktop → Web Browser
+- Type `http://www.company.com` → press Enter
+- Expected: The company web page loads
+
+---
+
+### Final Summary Table
+
+| Router | RIP Networks | Static Routes | Default Route |
+|--------|-------------|--------------|---------------|
+| Router1 | `10.0.0.0`, `192.168.10.0`, `192.168.20.0` | — | ✅ `0.0.0.0/0` → `10.0.0.2` (Router3) |
+| Router2 | `10.0.1.0`, `192.168.30.0`, `192.168.40.0` | — | — |
+| Router3 | ❌ No RIP | ✅ 7 static routes (Section 13) | — |
+| Router4 | `10.0.1.0`, `10.0.3.0` | — | ✅ `0.0.0.0/0` → `10.0.3.2` (Router5) |
+| Router5 | `10.0.2.0`, `10.0.3.0`, `192.168.50.0` ¹ | ✅ `192.168.10.0`, `192.168.20.0`, `10.0.0.0/30` | — |
+
+¹ Router5 uses `redistribute static` inside the RIP process so that the static routes above are also shared with Router4 and Router2 via RIP.
+
+---
+
+## 15. Bonus: Add a Default Route on Router4
 
 ### What is a Default Route?
 
@@ -1461,7 +1782,7 @@ If the ping fails, check:
 
 ---
 
-## 15. Live Presentation & Demo Guide
+## 16. Live Presentation & Demo Guide
 
 *(شرح المشروع)*
 
@@ -1628,7 +1949,7 @@ Router3# show ip route
 
 ### Part 8: Show Default Route on Router4 (1 minute)
 
-> **Note:** This step applies only if you completed Section 14 (adding a default route on Router4). If Router4 still uses RIP, skip this part.
+> **Note:** This step applies only if you completed Section 15 (adding a default route on Router4). If Router4 still uses RIP, skip this part.
 
 **What to do:** Click on Router4 → CLI tab.
 

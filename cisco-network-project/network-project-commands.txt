@@ -757,7 +757,95 @@ show ip route
 
 
 ================================================================
- SECTION 14 — ADD DEFAULT ROUTE ON ROUTER4
+ SECTION 14 — FIX ROUTING (RIP + STATIC + DEFAULT)
+ Run these commands to restore full network connectivity.
+ Fix Router1, Router5, and Router4 (in that order).
+ Router2 and Router3 need no changes.
+================================================================
+
+! ============================================================
+! FIX ROUTER1 — Restore RIP + Add Default Route
+! ============================================================
+enable
+configure terminal
+
+router rip
+ version 2
+ no auto-summary
+ network 10.0.0.0
+ network 192.168.10.0
+ network 192.168.20.0
+ exit
+
+ip route 0.0.0.0 0.0.0.0 10.0.0.2
+
+end
+write memory
+
+
+! ============================================================
+! FIX ROUTER5 — Restore RIP + Add Static Routes for Router1 side
+! ============================================================
+enable
+configure terminal
+
+router rip
+ version 2
+ no auto-summary
+ network 10.0.2.0
+ network 10.0.3.0
+ network 192.168.50.0
+ redistribute static
+ exit
+
+ip route 192.168.10.0 255.255.255.0 10.0.2.1
+ip route 192.168.20.0 255.255.255.0 10.0.2.1
+ip route 10.0.0.0 255.255.255.252 10.0.2.1
+
+end
+write memory
+
+
+! ============================================================
+! FIX ROUTER4 — Clean up static routes + keep default + RIP
+! ============================================================
+enable
+configure terminal
+
+no ip route 192.168.30.0 255.255.255.0 10.0.1.1
+no ip route 192.168.40.0 255.255.255.0 10.0.1.1
+
+router rip
+ version 2
+ no auto-summary
+ network 10.0.1.0
+ network 10.0.3.0
+ exit
+
+! Keep the default route (sends unknown traffic to Router5 at 10.0.3.2)
+! If it already exists, this command is safe to run again — it will just be ignored.
+ip route 0.0.0.0 0.0.0.0 10.0.3.2
+
+end
+write memory
+
+
+! ============================================================
+! ROUTER2 — No changes needed (RIP already working)
+! ROUTER3 — No changes needed (Static routes from Section 13)
+! ============================================================
+
+! ============================================================
+! VERIFICATION — Run on each router after fixing
+! ============================================================
+! On every router: show ip route
+! On HR-PC1: ping 192.168.50.10
+! On HR-PC1: ping 192.168.30.100
+! On Sales-PC1: ping 192.168.10.100
+
+
+================================================================
+ SECTION 15 — ADD DEFAULT ROUTE ON ROUTER4
  (Run these commands on Router4 to replace RIP with
   static routes + a default route)
 ================================================================
@@ -795,7 +883,7 @@ show ip route
 
 
 ================================================================
- SECTION 15 — PRESENTATION DEMO COMMANDS
+ SECTION 16 — PRESENTATION DEMO COMMANDS
  (Quick reference: commands to run during your live demo)
 ================================================================
 
@@ -811,7 +899,7 @@ show running-config | section interface
 ! --- On Router3 (show static routes — if Section 13 was done) ---
 show ip route
 
-! --- On Router4 (show default route — if Section 14 was done) ---
+! --- On Router4 (show default route — if Section 15 was done) ---
 show ip route
 
 ! --- On any PC (test connectivity) ---
